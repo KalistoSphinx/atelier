@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "67207419656",
+    "project_id": "atelier-a923f",
+    "storage_bucket": "atelier-a923f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67207419656:android:b4b4eedcd2e7e207e53ebd",
+        "android_client_info": {
+          "package_name": "com.example.image_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "67207419656-44i9k9d2cp025f0e3hhcp7ubftfam69r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.image_app",
+            "certificate_hash": "9382828cd0dede450306bbdea15ffbc64d02cbc7"
+          }
+        },
+        {
+          "client_id": "67207419656-nucgu8d8aqj0ksthvalp35gbekcmnnrt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfqPEgKdHO6b0njnBbisObVNmlY3_CZN0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "67207419656-nucgu8d8aqj0ksthvalp35gbekcmnnrt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "67207419656-ugogiee20c79k3ep9u8q352p2nr8v1l2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.imageApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
