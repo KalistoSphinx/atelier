@@ -23,6 +23,14 @@ class MyApp extends ConsumerWidget {
     final authState = ref.watch(authStateChangesProvider);
 
     return MaterialApp(
+      // builder: (context, child) {
+      //   return MediaQuery(
+      //     data: MediaQuery.of(
+      //       context,
+      //     ).copyWith(textScaler: TextScaler.noScaling),
+      //     child: child!,
+      //   );
+      // },
       theme: ThemeData(fontFamily: "Manrope"),
       debugShowCheckedModeBanner: false,
       home: authState.when(
