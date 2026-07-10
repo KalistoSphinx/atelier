@@ -6,8 +6,13 @@ class AuthRepository {
 
   AuthRepository(this._firebaseAuth);
 
-  Stream<User?> authStateChanges() => _firebaseAuth.authStateChanges();
+  Stream<User?> authStateChanges() => _firebaseAuth.userChanges();
   User? get currentUser => _firebaseAuth.currentUser;
+
+  Future<void> updateDisplayName(String name) async {
+    await _firebaseAuth.currentUser?.updateDisplayName(name);
+    await _firebaseAuth.currentUser?.reload();
+  }
 
   Future<UserCredential> signIn() async {
     final googleUser = await GoogleSignIn.instance.authenticate();

@@ -37,6 +37,13 @@ class AuthController extends AsyncNotifier<void> {
       await ref.read(authRepositoryProvider).signOut();
     });
   }
+
+  Future<void> updateDisplayName(String newName) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(authRepositoryProvider).updateDisplayName(newName);
+    });
+  }
 }
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(

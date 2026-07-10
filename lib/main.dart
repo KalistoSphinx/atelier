@@ -17,20 +17,11 @@ void main() async {
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateChangesProvider);
 
     return MaterialApp(
-      // builder: (context, child) {
-      //   return MediaQuery(
-      //     data: MediaQuery.of(
-      //       context,
-      //     ).copyWith(textScaler: TextScaler.noScaling),
-      //     child: child!,
-      //   );
-      // },
       theme: ThemeData(fontFamily: "Manrope"),
       debugShowCheckedModeBanner: false,
       home: authState.when(
