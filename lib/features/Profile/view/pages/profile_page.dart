@@ -93,15 +93,80 @@ class ProfilePage extends ConsumerWidget {
                 },
               ),
               
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               
               // Logout Option
               ProfileOptionItem(
                 icon: LucideIcons.logOut,
-                title: "Logout",
+                title: "Log Out",
                 isDestructive: true,
                 onTap: () {
-                  ref.read(authControllerProvider.notifier).signOut();
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        elevation: 1,
+                        backgroundColor: Colors.white,
+                        title: const Text(
+                          "Log out",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        content: const Text(
+                          "Are you sure you want to log out of your account?",
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        actionsPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: TextButton.styleFrom(
+                              
+                              foregroundColor: Colors.black54,
+                              textStyle: const TextStyle(
+                                fontFamily: "manrope",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            child: const Text("Cancel"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ref.read(authControllerProvider.notifier).signOut();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.shade600,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 8),
+                            ),
+                            child: const Text(
+                              "Logout",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
               ),
             ],

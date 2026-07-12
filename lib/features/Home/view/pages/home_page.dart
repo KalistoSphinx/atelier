@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_app/features/Home/viewmodel/image_list_provider.dart';
 
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/image_card.dart';
@@ -20,7 +24,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CupertinoColors.white,
+      resizeToAvoidBottomInset: false,
       body: Stack(
+        fit: .expand,
         children: [
           IndexedStack(
             index: currentIndex,
@@ -46,16 +52,19 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _HomeContent extends StatelessWidget {
+class _HomeContent extends ConsumerWidget {
   const _HomeContent();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final images = ref.watch(imageListProvider);
+
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: SingleChildScrollView(
           child: Column(
+            mainAxisSize: .max,
             children: [
               const SizedBox(height: 20),
               Row(
@@ -70,7 +79,9 @@ class _HomeContent extends StatelessWidget {
                     ),
                   ),
                   CupertinoButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      ref.read(imageListProvider.notifier).pickAndSaveImage();
+                    },
                     padding: EdgeInsets.zero,
                     child: const Icon(Icons.add, size: 28, color: Colors.black),
                   ),
@@ -105,26 +116,62 @@ class _HomeContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 6,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 24,
-                  childAspectRatio: 0.6,
-                ),
-                itemBuilder: (context, index) {
-                  return FadeInDrop(
-                    delayInMilliseconds: index * 100,
-                    child: ImageCard(
-                      imageName: 'image_name_$index',
-                      date: '21 June 2026',
+                
+              images.isEmpty
+                  ? Padding(
+                    padding: const .only(top: 175),
+                    child: Column(
+                      children: [
+                        Icon(
+                          CupertinoIcons.photo_on_rectangle,
+                          size: 64,
+                          color: Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No images saved",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade400,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Tap + to add your first image",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  )
+                  : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: images.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 24,
+                            childAspectRatio: 0.6,
+                          ),
+                      itemBuilder: (context, index) {
+                        final File imageFile = images[index];
+                        return FadeInDrop(
+                          delayInMilliseconds: index * 100,
+                          child: ImageCard(
+                            image: imageFile,
+                            imageName: "nooo",
+                            date: '21 June 2026',
+                          ),
+                        );
+                      },
+                    ),
+                
               const SizedBox(height: 120), // Spacer for floating bottom nav bar
             ],
           ),

@@ -11,16 +11,21 @@ class AuthPage extends ConsumerWidget {
     const green = Color(0xFF2F8F82);
 
     final size = MediaQuery.sizeOf(context);
+    final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            Image.asset('assets/images/hero.png', height: size.height * 0.43, width: .infinity, ),
-        
-             SizedBox(height: size.height * 0.03),
-        
+            Image.asset(
+              'assets/images/hero.png',
+              height: size.height * 0.43,
+              width: .infinity,
+            ),
+
+            SizedBox(height: size.height * 0.03),
+
             Expanded(
               child: Padding(
                 padding: const .symmetric(horizontal: 36),
@@ -48,9 +53,9 @@ class AuthPage extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       const Text.rich(
                         TextSpan(
                           children: [
@@ -76,9 +81,9 @@ class AuthPage extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 20),
-                      
+
                       const Opacity(
                         opacity: 0.8,
                         child: Text(
@@ -91,11 +96,12 @@ class AuthPage extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      
+
                       const Spacer(),
-                      
+
                       SizedBox(
                         height: 52,
+                        width: .infinity,
                         child: OutlinedButton(
                           onPressed: () => ref
                               .read(authControllerProvider.notifier)
@@ -110,30 +116,39 @@ class AuthPage extends ConsumerWidget {
                               width: 1.2,
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: .center,
-                            spacing: 18,
-                            children: [
-                              SvgPicture.asset(
-                                'assets/images/google.svg',
-                                height: 20,
-                                width: 20,
-                              ),
-                              const Text(
-                                "Sign in with Google",
-                                style: TextStyle(
-                                  fontWeight: .bold,
-                                  fontSize: 16,
-                                  letterSpacing: -0.2,
+                          child: authState.isLoading
+                              ? const SizedBox(
+                                  width: 20, // Constrain the width
+                                  height: 20, // Constrain the height
+                                  child: CircularProgressIndicator(
+                                    strokeWidth:
+                                        2.5, // Make the loading circle thinner
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: .center,
+                                  spacing: 18,
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/images/google.svg',
+                                      height: 20,
+                                      width: 20,
+                                    ),
+                                    const Text(
+                                      "Sign in with Google",
+                                      style: TextStyle(
+                                        fontWeight: .bold,
+                                        fontSize: 16,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 18),
-                      
+
                       const Align(
                         alignment: .center,
                         child: Text(
@@ -147,7 +162,7 @@ class AuthPage extends ConsumerWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 20,)
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),

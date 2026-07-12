@@ -21,26 +21,19 @@ class ProfileOptionItem extends StatelessWidget {
     const destructiveColor = Color(0xFFDC2626); 
 
     return Material(
-      color: const Color(0xFFF6F6F6),
+      color:  const Color(0xFFF3F3F3),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: isDestructive ? destructiveColor.withValues(alpha: 0.15) : const Color(0xFFE8E8E8),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  color: isDestructive ? destructiveColor : Colors.grey.shade800,
-                  size: 20,
-                ),
+              Icon(
+                icon,
+                color: isDestructive ? destructiveColor : textColor,
+                size: 22,
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -53,11 +46,6 @@ class ProfileOptionItem extends StatelessWidget {
                     letterSpacing: -0.2,
                   ),
                 ),
-              ),
-              Icon(
-                CupertinoIcons.chevron_right,
-                color: isDestructive ? destructiveColor : Colors.grey.shade900,
-                size: 18,
               ),
             ],
           ),

@@ -1,14 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ImageCard extends StatelessWidget {
-  final String? imageUrl;
+  final File image;
   final String imageName;
   final String date;
 
   const ImageCard({
     super.key,
-    this.imageUrl,
+    required this.image,
     required this.imageName,
     required this.date,
   });
@@ -19,19 +21,14 @@ class ImageCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(20),
-              image: imageUrl != null
-                  ? const DecorationImage(
-                      image: NetworkImage("https://images.pexels.com/photos/38083493/pexels-photo-38083493/free-photo-of-stunning-coastal-cliff-view-in-pembrokeshire.jpeg?cs=tinysrgb&dpr=1&w=500"),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+          child: ClipRRect(
+            borderRadius: .circular(16),
+            child: Image.file(
+              width: .infinity,
+              image,
+              fit: .cover,
             ),
-          ),
+          )
         ),  
         const SizedBox(height: 12),
         Text(
