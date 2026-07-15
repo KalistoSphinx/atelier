@@ -60,7 +60,7 @@ class AuthPage extends ConsumerWidget {
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: 'Every photo deserves ',
+                              text: 'Your library, always within ',
                               style: TextStyle(
                                 fontSize: 30,
                                 fontWeight: FontWeight.w800,
@@ -69,7 +69,7 @@ class AuthPage extends ConsumerWidget {
                               ),
                             ),
                             TextSpan(
-                              text: 'perfection.',
+                              text: 'reach.',
                               style: TextStyle(
                                 color: green,
                                 fontSize: 30,
@@ -87,11 +87,11 @@ class AuthPage extends ConsumerWidget {
                       const Opacity(
                         opacity: 0.8,
                         child: Text(
-                          'Capture your memories and transform them into timeless masterpieces.',
+                          'Import, organize, and enjoy your favorite stories all in one place.',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            height: 1.36,
+                            height: 1.5,
                             letterSpacing: -0.1,
                           ),
                         ),
