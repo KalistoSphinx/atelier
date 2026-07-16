@@ -1,26 +1,24 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Home/model/book_model.dart';
 import 'package:image_app/features/Home/viewmodel/book_list_provider.dart';
 
-class RenameImageSheet extends ConsumerStatefulWidget {
+class RenameBookSheet extends ConsumerStatefulWidget {
   final Book book;
   final String initialName;
 
-  const RenameImageSheet({
+  const RenameBookSheet({
     super.key,
     required this.book,
     required this.initialName,
   });
 
   @override
-  ConsumerState<RenameImageSheet> createState() => _RenameImageSheetState();
+  ConsumerState<RenameBookSheet> createState() => _RenameBookSheetState();
 }
 
-class _RenameImageSheetState extends ConsumerState<RenameImageSheet> {
+class _RenameBookSheetState extends ConsumerState<RenameBookSheet> {
   late TextEditingController _nameController;
   bool _isNameValid = true;
 
@@ -110,7 +108,7 @@ class _RenameImageSheetState extends ConsumerState<RenameImageSheet> {
                       final newName = _nameController.text.trim();
                       ref
                           .read(bookListProvider.notifier)
-                          .renameBook(File(widget.book.filePath), newName);
+                          .renameBook(widget.book, newName);
                       Navigator.pop(context);
                     }
                   : null,

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_app/features/Home/view/widgets/image_card.dart';
+import 'package:image_app/features/Home/view/widgets/book_card.dart';
 import 'package:image_app/features/Home/viewmodel/book_list_provider.dart';
 import 'package:path/path.dart' as p;
 import '../widgets/custom_bottom_nav_bar.dart';
@@ -100,7 +100,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                   ),
                   CupertinoButton(
                     onPressed: () {
-                      ref.read(bookListProvider.notifier).pickAndSaveImage();
+                      ref.read(bookListProvider.notifier).pickAndSaveImage(context);
                     },
                     padding: EdgeInsets.zero,
                     child: const Icon(Icons.add, size: 28, color: Colors.black),

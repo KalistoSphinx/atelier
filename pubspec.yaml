@@ -49,6 +49,10 @@ dependencies:
   image: 3.3.0
   archive: ^3.6.1
   pdfx: ^2.9.2
+  syncfusion_flutter_pdf: ^33.2.13
+  epub_view: ^3.2.0
+  scrollable_positioned_list: ^0.3.8
+  flutter_html: ^3.0.0
 
 dev_dependencies:
   flutter_test:
