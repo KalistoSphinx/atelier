@@ -82,59 +82,92 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
   }
 
   Widget _buildTopBar() {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.95),
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            icon: const Icon(LucideIcons.arrowLeft, color: Colors.black),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  widget.book.title,
-                  style: GoogleFonts.robotoMono(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (widget.book.author != null && widget.book.author!.isNotEmpty)
-                  Text(
-                    widget.book.author!,
-                    style: GoogleFonts.robotoMono(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black54,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ],
+          // Back button — circular with elevation
+          Material(
+            elevation: 2,
+            color: Colors.white.withValues(alpha: 0.90),
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () => Navigator.pop(context),
+              child: const Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(LucideIcons.arrowLeft, color: Colors.black, size: 22),
+              ),
             ),
           ),
-          IconButton(
-            icon: const Icon(LucideIcons.list, color: Colors.black),
-            onPressed: () {
-              ref.read(readerProvider.notifier).setChapterSearchQuery('');
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const ChapterListSheet(),
-              );
-            },
+
+          const SizedBox(width: 12),
+
+          // Title container — elevated rounded pill
+          Expanded(
+            child: Material(
+              elevation: 2,
+              color: Colors.white.withValues(alpha: 0.90),
+              borderRadius: BorderRadius.circular(100),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.book.title,
+                      style: GoogleFonts.robotoMono(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    if (widget.book.author != null && widget.book.author!.isNotEmpty)
+                      Text(
+                        widget.book.author!,
+                        style: GoogleFonts.robotoMono(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black54,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // Chapter list button — circular with elevation
+          Material(
+            elevation: 2,
+            color: Colors.white.withValues(alpha: 0.90),
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () {
+                ref.read(readerProvider.notifier).setChapterSearchQuery('');
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const ChapterListSheet(),
+                );
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(LucideIcons.list, color: Colors.black, size: 22),
+              ),
+            ),
           ),
         ],
       ),

@@ -52,8 +52,8 @@ class EditProfileSheetState extends ConsumerState<EditProfileSheet> {
             "Edit Profile",
             style: TextStyle(
               fontSize: 24,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.6,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: 32), // Increased spacing
