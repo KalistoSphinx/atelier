@@ -21,8 +21,12 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
   bool _isLoading = true;
   String? _error;
   EpubBook? _epubBook;
-  List<EpubChapter> _flatChapters = [];
+  final List<EpubChapter> _flatChapters = [];
   late PageController _pageController;
+
+  /// Pre-resolved image cache: maps normalized filename -> Uint8List.
+  /// Built once after parsing so every chapter page gets instant image access.
+  final Map<String, Uint8List> _imageCache = {};
 
   @override
   void initState() {
@@ -37,11 +41,15 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
       await Future.delayed(const Duration(milliseconds: 300));
 
       final bytes = await File(widget.book.filePath).readAsBytes();
-      
+
       // Parse epub book in a separate isolate to keep UI smooth
       _epubBook = await compute(EpubReader.readBook, bytes);
-      
+
       _extractChapters(_epubBook!.Chapters ?? []);
+
+      // Pre-resolve all images into a fast-lookup cache keyed by filename.
+      // This avoids repeated map scans inside the Html builder on every frame.
+      _buildImageCache();
 
       final List<ChapterInfo> chapterInfos = [];
       for (int i = 0; i < _flatChapters.length; i++) {
@@ -56,7 +64,9 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(readerProvider.notifier).setChapters(chapterInfos);
-        ref.read(readerProvider.notifier).setTotalPages(chapterInfos.isNotEmpty ? chapterInfos.length : 1);
+        ref
+            .read(readerProvider.notifier)
+            .setTotalPages(chapterInfos.isNotEmpty ? chapterInfos.length : 1);
       });
 
       if (mounted) {
@@ -70,6 +80,19 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
           _error = "Error loading EPUB: $e";
           _isLoading = false;
         });
+      }
+    }
+  }
+
+  /// Walk the EPUB image map once and store decoded bytes keyed by filename.
+  void _buildImageCache() {
+    final images = _epubBook?.Content?.Images;
+    if (images == null) return;
+
+    for (final entry in images.entries) {
+      if (entry.value.Content != null) {
+        final fileName = entry.key.split('/').last;
+        _imageCache[fileName] = Uint8List.fromList(entry.value.Content!);
       }
     }
   }
@@ -106,7 +129,8 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
     // Listen to external page changes (e.g., from slider or chapter list)
     ref.listen<ReaderState>(readerProvider, (previous, next) {
       if (previous != null && previous.currentPage != next.currentPage) {
-        if (_pageController.hasClients && _pageController.page?.round() != next.currentPage - 1) {
+        if (_pageController.hasClients &&
+            _pageController.page?.round() != next.currentPage - 1) {
           _pageController.jumpToPage(next.currentPage - 1);
         }
       }
@@ -115,53 +139,71 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
     return PageView.builder(
       controller: _pageController,
       itemCount: _flatChapters.length,
+      // Keep 1 page on each side pre-built so swiping is instant
+      allowImplicitScrolling: true,
       onPageChanged: (index) {
         ref.read(readerProvider.notifier).setPage(index + 1);
       },
       itemBuilder: (context, index) {
-        final chapter = _flatChapters[index];
-        final htmlContent = chapter.HtmlContent ?? '';
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 60),
-          child: Html(
-            data: htmlContent,
-            extensions: [
-              TagExtension(
-                tagsToExtend: {"img"},
-                builder: (extensionContext) {
-                  final src = extensionContext.attributes['src'];
-                  if (src != null && _epubBook?.Content?.Images != null) {
-                    // Try to match the image source in the EPUB images map
-                    final fileName = src.split('/').last;
-                    final imageEntry = _epubBook!.Content!.Images!.entries
-                        .where((e) => e.key.endsWith(fileName))
-                        .firstOrNull;
-
-                    if (imageEntry != null && imageEntry.value.Content != null) {
-                      final bytes = Uint8List.fromList(imageEntry.value.Content!);
-                      return Image.memory(
-                        bytes,
-                        fit: BoxFit.contain,
-                        gaplessPlayback: true,
-                      );
-                    }
-                  }
-                  return const Icon(Icons.broken_image);
-                },
-              ),
-            ],
-            style: {
-              "body": Style(
-                fontSize: FontSize(18.0),
-                lineHeight: const LineHeight(1.6),
-                margin: Margins.zero,
-                padding: HtmlPaddings.zero,
-              ),
-            },
-          ),
+        return _ChapterPage(
+          key: ValueKey('epub_ch_$index'),
+          chapter: _flatChapters[index],
+          imageCache: _imageCache,
         );
       },
+    );
+  }
+}
+
+/// Extracted as a separate widget so each chapter page maintains its own
+/// scroll state independently and Flutter can cache/dispose them efficiently.
+class _ChapterPage extends StatelessWidget {
+  final EpubChapter chapter;
+  final Map<String, Uint8List> imageCache;
+
+  const _ChapterPage({
+    super.key,
+    required this.chapter,
+    required this.imageCache,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final htmlContent = chapter.HtmlContent ?? '';
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 60),
+      child: Html(
+        data: htmlContent,
+        extensions: [
+          TagExtension(
+            tagsToExtend: {"img"},
+            builder: (extensionContext) {
+              final src = extensionContext.attributes['src'];
+              if (src != null) {
+                final fileName = src.split('/').last;
+                final bytes = imageCache[fileName];
+                if (bytes != null) {
+                  return Image.memory(
+                    bytes,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                  );
+                }
+              }
+              return const Icon(Icons.broken_image);
+            },
+          ),
+        ],
+        style: {
+          "body": Style(
+            fontSize: FontSize(18.0),
+            lineHeight: const LineHeight(1.6),
+            margin: Margins.zero,
+            padding: HtmlPaddings.zero,
+          ),
+        },
+      ),
     );
   }
 }

@@ -192,7 +192,6 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: 16,
-                            mainAxisSpacing: 24,
                             childAspectRatio: 0.49,
                           ),
                       itemBuilder: (context, index) {

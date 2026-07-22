@@ -152,16 +152,27 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .center,
+            spacing: 20,
             children: [
-              IconButton(
-                icon: const Icon(LucideIcons.chevronLeft, color: Colors.black),
-                onPressed: () {
-                  if (state.currentPage > 1) {
-                    ref.read(readerProvider.notifier).setPage(state.currentPage - 1);
-                  }
-                },
+              Material(
+                elevation: 1,
+                color: Colors.white,
+                borderRadius: .circular(100),
+                child: InkWell(
+                  borderRadius: .circular(100),
+                  onTap: (){
+                    if (state.currentPage > 1) {
+                      ref.read(readerProvider.notifier).setPage(state.currentPage - 1);
+                    }
+                  },
+                  child: Container(
+                    padding: const .all(8),
+                    child: const Icon(LucideIcons.chevronLeft, color: Colors.black,),
+                  ),
+                ),
               ),
+              
               GestureDetector(
                 onTap: () {
                   showModalBottomSheet(
@@ -171,32 +182,42 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                     builder: (context) => const PageSliderSheet(),
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                child: Material(
+                  color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(100),
-                    border: Border.all(color: Colors.grey.shade300, width: 1.5)
-                  ),
-                  child: Text(
-                    ext == '.epub' 
-                      ? "Ch. ${state.currentPage} / ${state.totalPages}"
-                      : "${state.currentPage} / ${state.totalPages}",
-                    style: GoogleFonts.robotoMono(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                    elevation: 1,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                    child: Text(
+                      ext == '.epub' 
+                        ? "Ch. ${state.currentPage} / ${state.totalPages}"
+                        : "${state.currentPage} / ${state.totalPages}",
+                      style: GoogleFonts.robotoMono(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                 ),
               ),
-              IconButton(
-                icon: const Icon(LucideIcons.chevronRight, color: Colors.black),
-                onPressed: () {
-                  if (state.currentPage < state.totalPages) {
+
+              Material(
+                elevation: 1,
+                color: Colors.white,
+                borderRadius: .circular(100),
+                child: InkWell(
+                  borderRadius: .circular(100),
+                  onTap: (){
+                    if (state.currentPage < state.totalPages) {
                     ref.read(readerProvider.notifier).setPage(state.currentPage + 1);
                   }
-                },
+                  },
+                  child: Container(
+                    padding: const .all(8),
+                    child: const Icon(LucideIcons.chevronRight, color: Colors.black,),
+                  ),
+                ),
               ),
             ],
           ),

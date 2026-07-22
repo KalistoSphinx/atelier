@@ -57,7 +57,7 @@ class _RenameBookSheetState extends ConsumerState<RenameBookSheet> {
             "Rename Book",
             style: TextStyle(
               fontSize: 24,
-              fontWeight: FontWeight.w700,
+              fontWeight: .w800,
               letterSpacing: -0.6,
             ),
           ),

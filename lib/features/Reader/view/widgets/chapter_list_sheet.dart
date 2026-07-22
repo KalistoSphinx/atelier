@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Reader/viewmodel/reader_provider.dart';
@@ -35,14 +34,14 @@ class _ChapterListSheetState extends ConsumerState<ChapterListSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+          const Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 24),
             child: Text(
               "Chapters",
-              style: GoogleFonts.robotoMono(
+              style: TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.6,
               ),
             ),
           ),

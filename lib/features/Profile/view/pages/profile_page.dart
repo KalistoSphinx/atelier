@@ -111,8 +111,8 @@ class ProfilePage extends ConsumerWidget {
                           "Log out",
                           style: TextStyle(
                             fontSize: 22,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.6,
                           ),
                         ),
                         content: const Text(

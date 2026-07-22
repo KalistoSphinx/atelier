@@ -19,7 +19,11 @@ class CbzViewerWidget extends ConsumerStatefulWidget {
 class _CbzViewerWidgetState extends ConsumerState<CbzViewerWidget> {
   late InputFileStream _inputStream;
   late Archive _archive;
-  List<ArchiveFile> _imageFiles = [];
+
+  /// Pre-decoded image bytes for every page in the CBZ.
+  /// Built once at load so pageview items get instant Uint8List access.
+  final List<Uint8List> _decodedPages = [];
+
   bool _isLoading = true;
   String? _error;
   late PageController _pageController;
@@ -36,17 +40,24 @@ class _CbzViewerWidgetState extends ConsumerState<CbzViewerWidget> {
       _inputStream = InputFileStream(widget.book.filePath);
       _archive = ZipDecoder().decodeBuffer(_inputStream);
 
-      _imageFiles = _archive.where((file) {
+      final imageFiles = _archive.where((file) {
         final ext = p.extension(file.name).toLowerCase();
         return file.isFile &&
             ['.jpg', '.jpeg', '.png', '.webp'].contains(ext) &&
             !file.name.startsWith('__MACOSX'); // Exclude macos hidden files
       }).toList();
 
-      _imageFiles.sort((a, b) => a.name.compareTo(b.name));
+      imageFiles.sort((a, b) => a.name.compareTo(b.name));
+
+      // Pre-decode all image bytes up front so pageview items never
+      // have to do any conversion work — they get raw Uint8List instantly.
+      for (final file in imageFiles) {
+        final content = file.content as List<int>;
+        _decodedPages.add(Uint8List.fromList(content));
+      }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(readerProvider.notifier).setTotalPages(_imageFiles.length);
+        ref.read(readerProvider.notifier).setTotalPages(_decodedPages.length);
       });
 
       setState(() {
@@ -77,14 +88,15 @@ class _CbzViewerWidgetState extends ConsumerState<CbzViewerWidget> {
       return Center(child: Text(_error!));
     }
 
-    if (_imageFiles.isEmpty) {
+    if (_decodedPages.isEmpty) {
       return const Center(child: Text("No images found in CBZ."));
     }
 
     // Listen to provider state changes to handle external page jumps (like from the slider)
     ref.listen<ReaderState>(readerProvider, (previous, next) {
       if (previous != null && previous.currentPage != next.currentPage) {
-        if (_pageController.hasClients && _pageController.page?.round() != next.currentPage - 1) {
+        if (_pageController.hasClients &&
+            _pageController.page?.round() != next.currentPage - 1) {
           _pageController.jumpToPage(next.currentPage - 1);
         }
       }
@@ -95,17 +107,15 @@ class _CbzViewerWidgetState extends ConsumerState<CbzViewerWidget> {
       maxScale: 4.0,
       child: PageView.builder(
         controller: _pageController,
-        itemCount: _imageFiles.length,
+        itemCount: _decodedPages.length,
+        // Pre-build adjacent pages so swiping feels zero-delay
+        allowImplicitScrolling: true,
         onPageChanged: (index) {
           ref.read(readerProvider.notifier).setPage(index + 1);
         },
         itemBuilder: (context, index) {
-          final file = _imageFiles[index];
-          final content = file.content as List<int>;
-          final bytes = Uint8List.fromList(content);
-
           return Image.memory(
-            bytes,
+            _decodedPages[index],
             fit: BoxFit.contain,
             gaplessPlayback: true,
           );

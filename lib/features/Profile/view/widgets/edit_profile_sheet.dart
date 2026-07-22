@@ -52,7 +52,7 @@ class EditProfileSheetState extends ConsumerState<EditProfileSheet> {
             "Edit Profile",
             style: TextStyle(
               fontSize: 24,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
               letterSpacing: -0.6,
             ),
           ),
