@@ -31,7 +31,8 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    final initialIndex = widget.book.currentPage > 0 ? widget.book.currentPage - 1 : 0;
+    _pageController = PageController(initialPage: initialIndex);
     _loadEpub();
   }
 

@@ -180,20 +180,40 @@ class _BookCardState extends ConsumerState<BookCard> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (widget.book.author != null && widget.book.author!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      widget.book.author!,
-                      style: GoogleFonts.robotoMono(
-                        fontSize: 12,
-                        color: Colors.black45,
-                        fontWeight: FontWeight.w500,
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        widget.book.format == 'epub'
+                            ? "Ch. ${widget.book.currentPage}"
+                            : "Page ${widget.book.currentPage}",
+                        style: GoogleFonts.robotoMono(
+                          fontSize: 11,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                      Text(
+                        "${widget.book.totalPages > 1 ? ((widget.book.currentPage / widget.book.totalPages) * 100).toInt() : 0}%",
+                        style: GoogleFonts.robotoMono(
+                          fontSize: 11,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  LinearProgressIndicator(
+                    value: widget.book.totalPages > 1 
+                        ? widget.book.currentPage / widget.book.totalPages 
+                        : 0.0,
+                    backgroundColor: Colors.grey.shade200,
+                    color: Colors.black,
+                    minHeight: 3,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ],
               ),
             ],

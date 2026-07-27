@@ -28,11 +28,25 @@ class _CbzViewerWidgetState extends ConsumerState<CbzViewerWidget> {
   String? _error;
   late PageController _pageController;
 
+  final TransformationController _transformationController = TransformationController();
+  bool _isZoomed = false;
+
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    final initialIndex = widget.book.currentPage > 0 ? widget.book.currentPage - 1 : 0;
+    _pageController = PageController(initialPage: initialIndex);
+    _transformationController.addListener(_onZoomChange);
     _loadArchive();
+  }
+
+  void _onZoomChange() {
+    final isZoomed = _transformationController.value.getMaxScaleOnAxis() > 1.01;
+    if (isZoomed != _isZoomed) {
+      setState(() {
+        _isZoomed = isZoomed;
+      });
+    }
   }
 
   Future<void> _loadArchive() async {
@@ -73,6 +87,7 @@ class _CbzViewerWidgetState extends ConsumerState<CbzViewerWidget> {
 
   @override
   void dispose() {
+    _transformationController.dispose();
     _pageController.dispose();
     _inputStream.close();
     super.dispose();
@@ -102,25 +117,29 @@ class _CbzViewerWidgetState extends ConsumerState<CbzViewerWidget> {
       }
     });
 
-    return InteractiveViewer(
-      minScale: 1.0,
-      maxScale: 4.0,
-      child: PageView.builder(
-        controller: _pageController,
-        itemCount: _decodedPages.length,
-        // Pre-build adjacent pages so swiping feels zero-delay
-        allowImplicitScrolling: true,
-        onPageChanged: (index) {
-          ref.read(readerProvider.notifier).setPage(index + 1);
-        },
-        itemBuilder: (context, index) {
-          return Image.memory(
-            _decodedPages[index],
-            fit: BoxFit.contain,
-            gaplessPlayback: true,
-          );
-        },
-      ),
+    return PageView.builder(
+      controller: _pageController,
+      itemCount: _decodedPages.length,
+      physics: _isZoomed ? const NeverScrollableScrollPhysics() : null,
+      // Pre-build adjacent pages so swiping feels zero-delay
+      allowImplicitScrolling: true,
+      onPageChanged: (index) {
+        ref.read(readerProvider.notifier).setPage(index + 1);
+      },
+      itemBuilder: (context, index) {
+        return InteractiveViewer(
+          transformationController: _transformationController,
+          minScale: 1.0,
+          maxScale: 4.0,
+          child: Center(
+            child: Image.memory(
+              _decodedPages[index],
+              fit: BoxFit.contain,
+              gaplessPlayback: true,
+            ),
+          ),
+        );
+      },
     );
   }
 }

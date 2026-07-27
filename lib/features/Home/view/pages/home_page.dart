@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Home/view/widgets/book_card.dart';
 import 'package:image_app/features/Home/viewmodel/book_list_provider.dart';
-import 'package:path/path.dart' as p;
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/fade_in_drop.dart';
 import '../../../../features/Profile/view/pages/profile_page.dart';
@@ -74,9 +73,8 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
     final allBooks = ref.watch(bookListProvider);
     final books = _searchQuery.isEmpty
         ? allBooks
-        : allBooks.where((file) {
-            final name = p.basenameWithoutExtension(file.filePath).toLowerCase();
-            return name.contains(_searchQuery.toLowerCase());
+        : allBooks.where((book) {
+            return book.title.toLowerCase().contains(_searchQuery.toLowerCase());
           }).toList();
 
     return SafeArea(
@@ -200,10 +198,8 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                           delayInMilliseconds: index * 100,
                           child: BookCard(
                             book: book,
-                            bookName: p.basenameWithoutExtension(
-                              book.title,
-                            ),
-                            date: '21 June 2026',
+                            bookName: book.title,
+                            date: '',
                           ),
                         );
                       },

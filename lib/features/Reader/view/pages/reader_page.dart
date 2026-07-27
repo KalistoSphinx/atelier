@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Home/model/book_model.dart';
 import 'package:image_app/features/Reader/viewmodel/reader_provider.dart';
+import 'package:image_app/features/Home/viewmodel/book_list_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -26,6 +27,8 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(readerProvider.notifier).reset();
+      ref.read(readerProvider.notifier).setPage(widget.book.currentPage);
+      ref.read(readerProvider.notifier).setTotalPages(widget.book.totalPages);
     });
   }
 
@@ -33,6 +36,15 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
   Widget build(BuildContext context) {
     final readerState = ref.watch(readerProvider);
     final ext = p.extension(widget.book.filePath).toLowerCase();
+
+    ref.listen<ReaderState>(readerProvider, (previous, next) {
+      if ((previous?.currentPage != next.currentPage ||
+              previous?.totalPages != next.totalPages) &&
+          next.totalPages > 1) {
+        ref.read(bookListProvider.notifier).updateProgress(
+            widget.book.id, next.currentPage, next.totalPages);
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.white,

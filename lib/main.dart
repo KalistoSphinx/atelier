@@ -7,11 +7,13 @@ import 'package:image_app/features/auth/viewmodel/auth_providers.dart';
 import 'package:image_app/firebase_options.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_app/features/Home/viewmodel/library_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await GoogleSignIn.instance.initialize();
+  await LibraryService.instance.init();
   runApp(const ProviderScope(child: MyApp()));
 }
 

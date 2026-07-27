@@ -1,25 +1,25 @@
 import 'dart:io';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:image_app/features/Home/viewmodel/library_service.dart';
 import 'package:image/image.dart' as img;
 
 import 'package:archive/archive.dart';
 import 'package:pdfx/pdfx.dart';
 
 class CoverExtractor {
-  static Future<String?> extractAndSaveCover(File documentFile) async {
+  /// Extract and save the cover image for a book, using its UUID as the filename.
+  /// Returns the absolute path to the saved cover, or null if extraction fails.
+  static Future<String?> extractAndSaveCover(File documentFile, String bookId) async {
     try {
-      final extension = p.extension(documentFile.path).toLowerCase();
-      final documentName = p.basenameWithoutExtension(documentFile.path);
+      final extension = documentFile.path.split('.').last.toLowerCase();
 
-      if (extension == '.cbz' || extension == '.zip') {
-        return await _extractFromCbz(documentFile, documentName);
-      } else if (extension == '.epub') {
-        return await _extractFromEpub(documentFile, documentName);
-      } else if (extension == '.pdf') {
-        return await _extractFromPdf(documentFile, documentName);
+      if (extension == 'cbz' || extension == 'zip') {
+        return await _extractFromCbz(documentFile, bookId);
+      } else if (extension == 'epub') {
+        return await _extractFromEpub(documentFile, bookId);
+      } else if (extension == 'pdf') {
+        return await _extractFromPdf(documentFile, bookId);
       }
     } catch (e) {
       debugPrint('Error extracting cover: $e');
@@ -27,7 +27,7 @@ class CoverExtractor {
     return null;
   }
 
-  static Future<String?> _extractFromCbz(File file, String docName) async {
+  static Future<String?> _extractFromCbz(File file, String bookId) async {
     try {
       final bytes = await file.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
@@ -40,7 +40,7 @@ class CoverExtractor {
       if (imageFiles.isNotEmpty) {
         imageFiles.sort((a, b) => a.name.compareTo(b.name));
         final coverImageFile = imageFiles.first;
-        return await _saveImageBytes(coverImageFile.content as List<int>, '${docName}_cover.jpg');
+        return await _saveImageBytes(coverImageFile.content as List<int>, bookId);
       }
     } catch (e) {
       debugPrint('Error extracting cbz cover: $e');
@@ -48,7 +48,7 @@ class CoverExtractor {
     return null;
   }
 
-  static Future<String?> _extractFromPdf(File file, String docName) async {
+  static Future<String?> _extractFromPdf(File file, String bookId) async {
     try {
       final document = await PdfDocument.openFile(file.path);
       final page = await document.getPage(1);
@@ -63,7 +63,7 @@ class CoverExtractor {
       await document.close();
 
       if (pageImage != null) {
-        return await _saveImageBytes(pageImage.bytes, '${docName}_cover.jpg');
+        return await _saveImageBytes(pageImage.bytes, bookId);
       }
     } catch (e) {
       debugPrint('Error extracting pdf cover: $e');
@@ -71,7 +71,7 @@ class CoverExtractor {
     return null;
   }
 
-  static Future<String?> _extractFromEpub(File file, String docName) async {
+  static Future<String?> _extractFromEpub(File file, String bookId) async {
     final bytes = await file.readAsBytes();
     
     final epubBook = await EpubReader.readBook(bytes);
@@ -79,21 +79,19 @@ class CoverExtractor {
     final coverImage = epubBook.CoverImage;
     if (coverImage != null) {
       final imageBytes = img.encodeJpg(coverImage);
-      return await _saveImageBytes(imageBytes, '${docName}_cover.jpg');
+      return await _saveImageBytes(imageBytes, bookId);
     }
     return null;
   }
 
-  static Future<String> _saveImageBytes(
-    List<int> bytes,
-    String fileName,
-  ) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final imagePath = p.join(directory.path, fileName);
+  static Future<String> _saveImageBytes(List<int> bytes, String bookId) async {
+    final lib = LibraryService.instance;
+    await lib.init();
+    final coverPath = lib.getCoverPath(bookId);
 
-    final imageFile = File(imagePath);
+    final imageFile = File(coverPath);
     await imageFile.writeAsBytes(bytes);
 
-    return imagePath;
+    return coverPath;
   }
 }

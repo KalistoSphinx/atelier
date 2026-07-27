@@ -1,53 +1,32 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:image_app/features/Home/viewmodel/cover_extractor.dart';
 import 'package:image_app/features/Home/viewmodel/metadata_extractor.dart';
+import 'package:image_app/features/Home/viewmodel/library_service.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Home/model/book_model.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+
+const _uuid = Uuid();
 
 class BookListNotifier extends Notifier<List<Book>> {
   @override
   List<Book> build() {
-    _loadSavedBooks();
+    _loadBooks();
     return [];
   }
 
-  Future<void> _loadSavedBooks() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final files = directory.listSync().whereType<File>().toList();
+  Future<void> _loadBooks() async {
+    final books = await LibraryService.instance.loadBooks();
+    state = books;
+  }
 
-    List<Book> loadedBooks = [];
-
-    for (var file in files) {
-      final extension = p.extension(file.path).toLowerCase();
-      if (['.pdf', '.epub', '.cbz', '.zip'].contains(extension)) {
-        final docName = p.basenameWithoutExtension(file.path);
-        final coverPath = p.join(directory.path, '${docName}_cover.jpg');
-        String? finalCoverPath;
-        if (File(coverPath).existsSync()) {
-          finalCoverPath = coverPath;
-        }
-
-        final metadata = await MetadataExtractor.extractMetadata(file);
-
-        loadedBooks.add(
-          Book(
-            id: file.path,
-            title: metadata.title ?? docName,
-            filePath: file.path,
-            coverImagePath: finalCoverPath,
-            author: metadata.author,
-          ),
-        );
-      }
-    }
-
-    state = loadedBooks;
+  Future<void> _persist() async {
+    await LibraryService.instance.saveBooks(state);
   }
 
   Future<void> pickAndSaveImage(BuildContext context) async {
@@ -64,7 +43,7 @@ class BookListNotifier extends Notifier<List<Book>> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               shape: RoundedRectangleBorder(
-                borderRadius: .circular(16)
+                borderRadius: BorderRadius.circular(16)
               ),
               content: Text('Unsupported file format: $ext'),
               behavior: SnackBarBehavior.floating,
@@ -75,39 +54,60 @@ class BookListNotifier extends Notifier<List<Book>> {
         return;
       }
 
+      final lib = LibraryService.instance;
+      await lib.init();
+
       final originalFile = File(originalPath);
-      final directory = await getApplicationDocumentsDirectory();
+      final originalFileName = p.basename(originalFile.path);
 
-      final fileName = p.basename(originalFile.path);
-      final localFilePath = p.join(directory.path, fileName);
-
-      if (File(localFilePath).existsSync() ||
-          state.any((b) => b.filePath == localFilePath)) {
-        return; // Stop operation if file is duplicated
+      // Check for duplicate by original file name
+      if (state.any((b) => b.originalFileName == originalFileName)) {
+        return;
       }
 
+      // Generate stable UUID for this book
+      final bookId = _uuid.v4();
+      final format = ext.substring(1); // remove the dot
+      final fileName = '$bookId$ext';
+      final localFilePath = lib.getBookPath(fileName);
+
+      // Copy file to books/ directory
       final savedFile = await originalFile.copy(localFilePath);
-      final coverPath = await CoverExtractor.extractAndSaveCover(savedFile);
+
+      // Extract cover and save to covers/ directory
+      final coverPath = await CoverExtractor.extractAndSaveCover(
+        savedFile,
+        bookId,
+      );
+
+      // Extract metadata (only done once at import time)
       final metadata = await MetadataExtractor.extractMetadata(savedFile);
 
       final newBook = Book(
-        id: savedFile.path,
-        title: metadata.title ?? p.basenameWithoutExtension(savedFile.path),
-        filePath: savedFile.path,
-        coverImagePath: coverPath,
+        id: bookId,
+        title: metadata.title ?? p.basenameWithoutExtension(originalFileName),
         author: metadata.author,
+        format: format,
+        fileName: fileName,
+        originalFileName: originalFileName,
+        filePath: localFilePath,
+        coverImagePath: coverPath,
+        dateAdded: DateTime.now(),
       );
 
       state = [...state, newBook];
+      await _persist();
     }
   }
 
   Future<void> deleteBook(Book book) async {
+    // Delete book file
     final file = File(book.filePath);
     if (await file.exists()) {
       await file.delete();
     }
 
+    // Delete cover file
     if (book.coverImagePath != null) {
       final coverFile = File(book.coverImagePath!);
       if (await coverFile.exists()) {
@@ -116,41 +116,37 @@ class BookListNotifier extends Notifier<List<Book>> {
     }
 
     state = state.where((b) => b.id != book.id).toList();
+    await _persist();
   }
 
   Future<void> renameBook(Book targetBook, String newName) async {
-
-    final oldFile = File(targetBook.filePath);
-
-    if (await oldFile.exists()) {
-      final dir = oldFile.parent;
-      final ext = p.extension(oldFile.path);
-      final newPath = p.join(dir.path, "$newName$ext");
-      final newFile = await oldFile.rename(newPath);
-      
-      String? newCoverPath;
-      if (targetBook.coverImagePath != null) {
-        final coverFile = File(targetBook.coverImagePath!);
-        if (await coverFile.exists()) {
-          final newCoverName = p.join(dir.path, "${newName}_cover.jpg");
-          final renamedCover = await coverFile.rename(newCoverName);
-          newCoverPath = renamedCover.path;
-        }
+    state = state.map((b) {
+      if (b.id == targetBook.id) {
+        return b.copyWith(title: newName);
       }
+      return b;
+    }).toList();
+    await _persist();
+  }
 
-      state = state.map((b) {
-        if (b.filePath == oldFile.path) {
-          return Book(
-            id: newFile.path,
-            title: newName,
-            filePath: newFile.path,
-            coverImagePath: newCoverPath ?? b.coverImagePath,
-            author: b.author
-          );
-        }
-        return b;
-      }).toList();
-    }
+  Future<void> updateProgress(String bookId, int currentPage, int totalPages) async {
+    state = state.map((b) {
+      if (b.id == bookId) {
+        return b.copyWith(currentPage: currentPage, totalPages: totalPages);
+      }
+      return b;
+    }).toList();
+    await _persist();
+  }
+
+  Future<void> updateLastOpened(String bookId) async {
+    state = state.map((b) {
+      if (b.id == bookId) {
+        return b.copyWith(lastOpened: DateTime.now());
+      }
+      return b;
+    }).toList();
+    await _persist();
   }
 }
 

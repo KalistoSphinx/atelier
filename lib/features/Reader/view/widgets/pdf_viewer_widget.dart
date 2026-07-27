@@ -27,11 +27,25 @@ class _PdfViewerWidgetState extends ConsumerState<PdfViewerWidget> {
   /// Tracks which pages are currently being rendered to avoid duplicate work.
   final Set<int> _renderingPages = {};
 
+  final TransformationController _transformationController = TransformationController();
+  bool _isZoomed = false;
+
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    final initialIndex = widget.book.currentPage > 0 ? widget.book.currentPage - 1 : 0;
+    _pageController = PageController(initialPage: initialIndex);
+    _transformationController.addListener(_onZoomChange);
     _initPdf();
+  }
+
+  void _onZoomChange() {
+    final isZoomed = _transformationController.value.getMaxScaleOnAxis() > 1.01;
+    if (isZoomed != _isZoomed) {
+      setState(() {
+        _isZoomed = isZoomed;
+      });
+    }
   }
 
   Future<void> _initPdf() async {
@@ -98,6 +112,7 @@ class _PdfViewerWidgetState extends ConsumerState<PdfViewerWidget> {
 
   @override
   void dispose() {
+    _transformationController.dispose();
     _pageController.dispose();
     _document?.close();
     super.dispose();
@@ -123,6 +138,7 @@ class _PdfViewerWidgetState extends ConsumerState<PdfViewerWidget> {
     return PageView.builder(
       controller: _pageController,
       itemCount: _pageCount,
+      physics: _isZoomed ? const NeverScrollableScrollPhysics() : null,
       allowImplicitScrolling: true,
       onPageChanged: (index) {
         ref.read(readerProvider.notifier).setPage(index + 1);
@@ -133,6 +149,7 @@ class _PdfViewerWidgetState extends ConsumerState<PdfViewerWidget> {
 
         if (cached != null) {
           return InteractiveViewer(
+            transformationController: _transformationController,
             minScale: 1.0,
             maxScale: 4.0,
             child: Center(
