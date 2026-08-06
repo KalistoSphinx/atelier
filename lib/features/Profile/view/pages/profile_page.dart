@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Profile/view/widgets/edit_profile_sheet.dart';
+import 'package:image_app/features/Profile/view/widgets/profile_option.dart';
 import 'package:image_app/features/auth/viewmodel/auth_providers.dart';
-import 'package:image_app/features/auth/viewmodel/google_drive_provider.dart';
+import 'package:image_app/features/Profile/view/pages/settings_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -11,7 +14,6 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final drive = ref.watch(googleDriveProvider);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -78,7 +80,7 @@ class ProfilePage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: Column(
                   children: [
-                    _option(
+                    profileOption(
                       icon: LucideIcons.userPen,
                       title: "Edit Profile",
                       onTap: () {
@@ -100,54 +102,17 @@ class ProfilePage extends ConsumerWidget {
                       },
                     ),
                     const Divider(height: 1, color: Colors.white, thickness: 2),
-
-                    drive.when(
-                      data: (email) {
-                        final isConnected = email != null;
-                        return _option(
-                          icon: Icons.add_to_drive,
-                          title: isConnected
-                              ? "Connected to $email"
-                              : "Connect Google Drive",
-                          onTap: () {
-                            isConnected
-                                ? ref
-                                      .read(googleDriveProvider.notifier)
-                                      .disconnect()
-                                : ref
-                                      .read(googleDriveProvider.notifier)
-                                      .connect();
-                          },
-                        );
-                      },
-                      error: (_, _) {
-                        return _option(
-                          icon: Icons.add_to_drive,
-                          title: "Could not connect - Tap to retry",
-                          onTap: () {
-                            ref.read(googleDriveProvider.notifier).connect();
-                          },
-                        );
-                      },
-                      loading: () {
-                        return _option(
-                          icon: Icons.add_to_drive,
-                          trailing: const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                          title: "Connect Google Drive",
-                          onTap: () {},
-                        );
-                      },
-                    ),
-
-                    const Divider(height: 1, color: Colors.white, thickness: 2),
-                    _option(
+                    profileOption(
                       icon: LucideIcons.settings,
                       title: "Settings",
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsPage(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -161,7 +126,7 @@ class ProfilePage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: Column(
                   children: [
-                    _option(
+                    profileOption(
                       isDestructive: true,
                       icon: LucideIcons.logOut,
                       title: "Log Out",
@@ -248,34 +213,4 @@ class ProfilePage extends ConsumerWidget {
       ),
     );
   }
-}
-
-Widget _option({
-  required IconData icon,
-  required String title,
-  required VoidCallback onTap,
-  Widget? trailing,
-  bool isDestructive = false,
-}) {
-  const destructiveColor = Color(0xFFDC2626);
-
-  return ListTile(
-    onTap: onTap,
-    trailing: trailing,
-    contentPadding: const .symmetric(horizontal: 24, vertical: 0),
-    leading: Icon(
-      icon,
-      size: 22,
-      color: isDestructive ? destructiveColor : Colors.black,
-    ),
-    title: Text(
-      title,
-      style: TextStyle(
-        fontSize: 16,
-        color: isDestructive ? destructiveColor : Colors.black,
-        fontWeight: .w600,
-        letterSpacing: 0,
-      ),
-    ),
-  );
 }

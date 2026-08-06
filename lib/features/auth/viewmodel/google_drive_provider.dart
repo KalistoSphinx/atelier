@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_app/core/services/drive_sync_service.dart';
 import 'package:image_app/core/services/shared_prefs_service.dart';
 import 'package:image_app/features/auth/viewmodel/auth_providers.dart';
 
@@ -26,6 +27,8 @@ class GoogleDriveNotifier extends AsyncNotifier<String?> {
     state = await AsyncValue.guard(() async {
       await ref.read(authRepositoryProvider).disconnectGoogleDrive();
       await ref.read(sharedPrefsServiceProvider).clearDriveEmail();
+      await ref.read(sharedPrefsServiceProvider).clearSyncEnabled();
+      await ref.read(driveSyncServiceProvider).clearSyncData();
       return null;
     });
   }

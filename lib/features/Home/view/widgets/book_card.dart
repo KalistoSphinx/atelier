@@ -11,13 +11,17 @@ import 'package:image_app/features/Reader/view/pages/reader_page.dart';
 class BookCard extends ConsumerStatefulWidget {
   final Book book;
   final String bookName;
-  final String date;
+  final bool showProgressBar;
+  final bool showChapterNum;
+  final bool showAuthor;
 
   const BookCard({
     super.key,
     required this.book,
     required this.bookName,
-    required this.date,
+    this.showProgressBar = true,
+    this.showChapterNum = true,
+    this.showAuthor = false,
   });
 
   @override
@@ -74,6 +78,7 @@ class _BookCardState extends ConsumerState<BookCard> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () {
+                      ref.read(bookListProvider.notifier).updateLastOpened(widget.book.id);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -161,61 +166,79 @@ class _BookCardState extends ConsumerState<BookCard> {
         SizedBox(
           height: 80,
           child: Column(
-            crossAxisAlignment: .start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: .start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.bookName,
+              // Fixed-height title block — same height whether 1 or 2 lines render
+              Text(
+                widget.bookName,
+                style: GoogleFonts.robotoMono(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                  letterSpacing: -0.1,
+                  height: 1.4,
+                ),
+                maxLines: widget.showAuthor ? 1 : 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (widget.showAuthor)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    widget.book.author?.isNotEmpty == true ? widget.book.author! : 'Unknown Author',
                     style: GoogleFonts.robotoMono(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                      letterSpacing: -0.1,
-                      height: 1.4,
+                      fontSize: 12,
+                      color: Colors.black54,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        widget.book.format == 'epub'
-                            ? "Ch. ${widget.book.currentPage}"
-                            : "Page ${widget.book.currentPage}",
-                        style: GoogleFonts.robotoMono(
-                          fontSize: 11,
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w500,
-                        ),
+                ),
+              if (!widget.showAuthor) const SizedBox(height: 18) else const SizedBox(height: 6),
+              // Progress block
+              if (widget.showProgressBar)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.showChapterNum) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.book.format == 'epub'
+                                ? "Ch. ${widget.book.currentPage}"
+                                : "Page ${widget.book.currentPage}",
+                            style: GoogleFonts.robotoMono(
+                              fontSize: 11,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            "${widget.book.totalPages > 1 ? ((widget.book.currentPage / widget.book.totalPages) * 100).toInt() : 0}%",
+                            style: GoogleFonts.robotoMono(
+                              fontSize: 11,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        "${widget.book.totalPages > 1 ? ((widget.book.currentPage / widget.book.totalPages) * 100).toInt() : 0}%",
-                        style: GoogleFonts.robotoMono(
-                          fontSize: 11,
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      const SizedBox(height: 4),
                     ],
-                  ),
-                  const SizedBox(height: 4),
-                  LinearProgressIndicator(
-                    value: widget.book.totalPages > 1 
-                        ? widget.book.currentPage / widget.book.totalPages 
-                        : 0.0,
-                    backgroundColor: Colors.grey.shade200,
-                    color: Colors.black,
-                    minHeight: 3,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ],
-              ),
+                    LinearProgressIndicator(
+                      value: widget.book.totalPages > 1
+                          ? widget.book.currentPage / widget.book.totalPages
+                          : 0.0,
+                      backgroundColor: Colors.grey.shade200,
+                      color: Colors.black,
+                      minHeight: 5,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),

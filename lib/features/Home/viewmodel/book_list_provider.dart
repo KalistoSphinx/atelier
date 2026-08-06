@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:image_app/core/services/drive_sync_service.dart';
 import 'package:image_app/features/Home/viewmodel/cover_extractor.dart';
 import 'package:image_app/features/Home/viewmodel/metadata_extractor.dart';
 import 'package:image_app/features/Home/viewmodel/library_service.dart';
@@ -97,6 +98,7 @@ class BookListNotifier extends Notifier<List<Book>> {
 
       state = [...state, newBook];
       await _persist();
+      ref.read(driveSyncServiceProvider).markDirty();
     }
   }
 
@@ -117,6 +119,7 @@ class BookListNotifier extends Notifier<List<Book>> {
 
     state = state.where((b) => b.id != book.id).toList();
     await _persist();
+    ref.read(driveSyncServiceProvider).markDirty();
   }
 
   Future<void> renameBook(Book targetBook, String newName) async {
@@ -127,6 +130,7 @@ class BookListNotifier extends Notifier<List<Book>> {
       return b;
     }).toList();
     await _persist();
+    ref.read(driveSyncServiceProvider).markDirty();
   }
 
   Future<void> updateProgress(String bookId, int currentPage, int totalPages) async {
@@ -137,6 +141,7 @@ class BookListNotifier extends Notifier<List<Book>> {
       return b;
     }).toList();
     await _persist();
+    ref.read(driveSyncServiceProvider).markDirty();
   }
 
   Future<void> updateLastOpened(String bookId) async {

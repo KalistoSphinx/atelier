@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Home/view/widgets/book_card.dart';
 import 'package:image_app/features/Home/viewmodel/book_list_provider.dart';
+import 'package:image_app/features/Home/model/book_model.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/fade_in_drop.dart';
 import '../../../../features/Profile/view/pages/profile_page.dart';
+import 'library_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,7 +24,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CupertinoColors.white,
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: .expand,
@@ -101,7 +102,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                       ref.read(bookListProvider.notifier).pickAndSaveImage(context);
                     },
                     padding: EdgeInsets.zero,
-                    child: const Icon(Icons.add, size: 28, color: Colors.black),
+                    child:  const Icon(Icons.add, size: 28, color: Colors.black,),
                   ),
                 ],
               ),
@@ -182,34 +183,181 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                         ],
                       ),
                     )
-                  : GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: books.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16,
-                            childAspectRatio: 0.49,
-                          ),
-                      itemBuilder: (context, index) {
-                        final book = books[index];
-                        return FadeInDrop(
-                          delayInMilliseconds: index * 100,
-                          child: BookCard(
-                            book: book,
-                            bookName: book.title,
-                            date: '',
-                          ),
-                        );
-                      },
-                    ),
+                  : _searchQuery.isNotEmpty
+                      ? GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: books.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 30,
+                                childAspectRatio: 0.48,
+                              ),
+                          itemBuilder: (context, index) {
+                            final book = books[index];
+                            return FadeInDrop(
+                              delayInMilliseconds: index * 100,
+                              child: BookCard(
+                                book: book,
+                                bookName: book.title,
+                                showAuthor: true,
+                                showChapterNum: true,
+                                showProgressBar: true,
+                              ),
+                            );
+                          },
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildContinueReadingSection(books),
+                            const SizedBox(height: 20),
+                            _buildRecentlyAddedSection(books),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LibraryPage(),
+                                    ),
+                                  );
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.black,
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(CupertinoIcons.book, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Browse Library",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
 
               const SizedBox(height: 120), // Spacer for floating bottom nav bar
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildContinueReadingSection(List<Book> allBooks) {
+    // Filter books opened at least once and not completely finished
+    final continueReading = allBooks.where((b) {
+      if (b.lastOpened == null) return false;
+      if (b.currentPage >= b.totalPages && b.totalPages > 0) return false;
+      return true;
+    }).toList()
+      ..sort((a, b) => b.lastOpened!.compareTo(a.lastOpened!));
+
+    if (continueReading.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Continue Reading",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.6,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 280,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: continueReading.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              final book = continueReading[index];
+              return FadeInDrop(
+                delayInMilliseconds: index * 100,
+                child: SizedBox(
+                  width: 130, // Scale down the card horizontally
+                  child: BookCard(
+                    book: book,
+                    bookName: book.title,
+                    showAuthor: true,
+                    showChapterNum: false,
+                    showProgressBar: true,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentlyAddedSection(List<Book> allBooks) {
+    final recentBooks = List.of(allBooks)
+      ..sort((a, b) => b.dateAdded.compareTo(a.dateAdded));
+
+    if (recentBooks.isEmpty) return const SizedBox.shrink();
+
+    // Show up to 10 most recent books
+    final displayBooks = recentBooks.take(10).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Recently Added",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.6,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 280,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: displayBooks.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              final book = displayBooks[index];
+              return FadeInDrop(
+                delayInMilliseconds: index * 100,
+                child: SizedBox(
+                  width: 130, // Scale down the card horizontally
+                  child: BookCard(
+                    book: book,
+                    bookName: book.title,
+                    showAuthor: true,
+                    showChapterNum: false,
+                    showProgressBar: false,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

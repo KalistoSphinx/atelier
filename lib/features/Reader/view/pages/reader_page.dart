@@ -11,6 +11,7 @@ import 'package:image_app/features/Reader/view/widgets/epub_viewer_widget.dart';
 import 'package:image_app/features/Reader/view/widgets/cbz_viewer_widget.dart';
 import 'package:image_app/features/Reader/view/widgets/chapter_list_sheet.dart';
 import 'package:image_app/features/Reader/view/widgets/page_slider_sheet.dart';
+import 'package:image_app/core/services/shared_prefs_service.dart';
 
 class ReaderPage extends ConsumerStatefulWidget {
   final Book book;
@@ -83,12 +84,13 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
   }
 
   Widget _buildReader(String ext) {
+    final isVertical = ref.read(sharedPrefsServiceProvider).isVerticalReadingMode;
     if (ext == '.pdf') {
-      return PdfViewerWidget(book: widget.book);
+      return PdfViewerWidget(book: widget.book, isVerticalMode: isVertical);
     } else if (ext == '.epub') {
       return EpubViewerWidget(book: widget.book);
     } else if (ext == '.cbz' || ext == '.zip') {
-      return CbzViewerWidget(book: widget.book);
+      return CbzViewerWidget(book: widget.book, isVerticalMode: isVertical);
     }
     return const Center(child: Text("Unsupported format"));
   }

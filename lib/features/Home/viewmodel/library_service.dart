@@ -21,6 +21,7 @@ class LibraryService {
 
   Directory get booksDir => _booksDir;
   Directory get coversDir => _coversDir;
+  File get libraryFile => _libraryFile;
 
   Future<void> init() async {
     if (_initialized) return;

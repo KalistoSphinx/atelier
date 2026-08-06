@@ -1,8 +1,10 @@
 import 'dart:io';
 
+
 import 'package:epubx/epubx.dart' hide Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Home/model/book_model.dart';
@@ -24,10 +26,6 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
   final List<EpubChapter> _flatChapters = [];
   late PageController _pageController;
 
-  /// Pre-resolved image cache: maps normalized filename -> Uint8List.
-  /// Built once after parsing so every chapter page gets instant image access.
-  final Map<String, Uint8List> _imageCache = {};
-
   @override
   void initState() {
     super.initState();
@@ -47,10 +45,6 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
       _epubBook = await compute(EpubReader.readBook, bytes);
 
       _extractChapters(_epubBook!.Chapters ?? []);
-
-      // Pre-resolve all images into a fast-lookup cache keyed by filename.
-      // This avoids repeated map scans inside the Html builder on every frame.
-      _buildImageCache();
 
       final List<ChapterInfo> chapterInfos = [];
       for (int i = 0; i < _flatChapters.length; i++) {
@@ -85,19 +79,6 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
     }
   }
 
-  /// Walk the EPUB image map once and store decoded bytes keyed by filename.
-  void _buildImageCache() {
-    final images = _epubBook?.Content?.Images;
-    if (images == null) return;
-
-    for (final entry in images.entries) {
-      if (entry.value.Content != null) {
-        final fileName = entry.key.split('/').last;
-        _imageCache[fileName] = Uint8List.fromList(entry.value.Content!);
-      }
-    }
-  }
-
   void _extractChapters(List<EpubChapter> chapters) {
     for (var ch in chapters) {
       _flatChapters.add(ch);
@@ -123,7 +104,7 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
       return Center(child: Text(_error!));
     }
 
-    if (_flatChapters.isEmpty) {
+    if (_flatChapters.isEmpty || _epubBook == null) {
       return const Center(child: Text("No chapters found in EPUB."));
     }
 
@@ -140,8 +121,8 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
     return PageView.builder(
       controller: _pageController,
       itemCount: _flatChapters.length,
-      // Keep 1 page on each side pre-built so swiping is instant
       allowImplicitScrolling: true,
+      scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
       onPageChanged: (index) {
         ref.read(readerProvider.notifier).setPage(index + 1);
       },
@@ -149,7 +130,7 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
         return _ChapterPage(
           key: ValueKey('epub_ch_$index'),
           chapter: _flatChapters[index],
-          imageCache: _imageCache,
+          epubBook: _epubBook!,
         );
       },
     );
@@ -160,12 +141,12 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
 /// scroll state independently and Flutter can cache/dispose them efficiently.
 class _ChapterPage extends StatelessWidget {
   final EpubChapter chapter;
-  final Map<String, Uint8List> imageCache;
+  final EpubBook epubBook;
 
   const _ChapterPage({
     super.key,
     required this.chapter,
-    required this.imageCache,
+    required this.epubBook,
   });
 
   @override
@@ -182,14 +163,20 @@ class _ChapterPage extends StatelessWidget {
             builder: (extensionContext) {
               final src = extensionContext.attributes['src'];
               if (src != null) {
+                // Find image in the parsed epub content directly instead of caching them all
                 final fileName = src.split('/').last;
-                final bytes = imageCache[fileName];
-                if (bytes != null) {
-                  return Image.memory(
-                    bytes,
-                    fit: BoxFit.contain,
-                    gaplessPlayback: true,
-                  );
+                final images = epubBook.Content?.Images;
+                
+                if (images != null) {
+                  // The map keys are full paths, so we need to match by filename
+                  final match = images.entries.where((e) => e.key.endsWith(fileName)).firstOrNull;
+                  if (match != null && match.value.Content != null) {
+                    return Image.memory(
+                      Uint8List.fromList(match.value.Content!),
+                      fit: BoxFit.contain,
+                      gaplessPlayback: true,
+                    );
+                  }
                 }
               }
               return const Icon(Icons.broken_image);
