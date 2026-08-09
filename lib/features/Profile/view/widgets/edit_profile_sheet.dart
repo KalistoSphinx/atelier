@@ -37,6 +37,7 @@ class EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -62,7 +63,6 @@ class EditProfileSheetState extends ConsumerState<EditProfileSheet> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 10), // Spacing between label and input
@@ -74,7 +74,7 @@ class EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               hintStyle: const TextStyle(color: Colors.black45),
               errorText: !_isNameValid ? "Name cannot be blank" : null,
               filled: true,
-              fillColor: CupertinoColors.systemGrey6,
+              fillColor: theme.surfaceContainerHighest,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -88,8 +88,9 @@ class EditProfileSheetState extends ConsumerState<EditProfileSheet> {
             height: 54, // Slightly taller button
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
+                backgroundColor: theme.onSurface,
+                foregroundColor: theme.surface,
+                
               ),
               onPressed: _isNameValid
                   ? () {

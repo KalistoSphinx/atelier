@@ -9,7 +9,7 @@ import 'package:image_app/core/services/notification_service.dart';
 import 'package:image_app/core/services/shared_prefs_service.dart';
 import 'package:image_app/core/services/sync_manifest.dart';
 import 'package:image_app/features/Home/viewmodel/library_service.dart';
-
+import 'package:image_app/features/Home/viewmodel/book_list_provider.dart';
 
 class DriveSyncService {
   final Ref _ref;
@@ -544,6 +544,7 @@ class DriveSyncService {
       // Refresh library state if we downloaded library.json
       if (libraryDownload != null) {
         await lib.init(); // Reload from disk
+        _ref.read(bookListProvider.notifier).refresh(); // Update UI state
       }
 
       _ref.read(syncProgressProvider.notifier).complete("Load complete ✓");

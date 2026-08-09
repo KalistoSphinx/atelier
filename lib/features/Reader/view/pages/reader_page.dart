@@ -48,7 +48,6 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Stack(
           children: [
@@ -59,7 +58,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                 child: _buildReader(ext),
               ),
             ),
-
+        
             // Top Bar
             if (readerState.isOverlayVisible)
               Positioned(
@@ -68,7 +67,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                 right: 0,
                 child: _buildTopBar(),
               ),
-
+        
             // Bottom Bar
             if (readerState.isOverlayVisible)
               Positioned(
@@ -103,7 +102,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
           // Back button — circular with elevation
           Material(
             elevation: 2,
-            color: Colors.white.withValues(alpha: 0.90),
+            color: Theme.of(context).colorScheme.tertiaryContainer,
             shape: const CircleBorder(),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
@@ -111,7 +110,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
               onTap: () => Navigator.pop(context),
               child: const Padding(
                 padding: EdgeInsets.all(10),
-                child: Icon(LucideIcons.arrowLeft, color: Colors.black, size: 22),
+                child: Icon(LucideIcons.arrowLeft, size: 22),
               ),
             ),
           ),
@@ -122,7 +121,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
           Expanded(
             child: Material(
               elevation: 2,
-              color: Colors.white.withValues(alpha: 0.90),
+              color: Theme.of(context).colorScheme.tertiaryContainer,
               borderRadius: BorderRadius.circular(100),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -131,10 +130,11 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                   children: [
                     Text(
                       widget.book.title,
-                      style: GoogleFonts.robotoMono(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                         letterSpacing: 0,
+                  height: 1.4,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -143,10 +143,11 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                     if (widget.book.author != null && widget.book.author!.isNotEmpty)
                       Text(
                         widget.book.author!,
-                        style: GoogleFonts.robotoMono(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black54,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          letterSpacing: 0
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -163,7 +164,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
           // Chapter list button — circular with elevation
           Material(
             elevation: 2,
-            color: Colors.white.withValues(alpha: 0.90),
+            color: Theme.of(context).colorScheme.tertiaryContainer,
             shape: const CircleBorder(),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
@@ -173,13 +174,12 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
                   builder: (context) => const ChapterListSheet(),
                 );
               },
               child: const Padding(
                 padding: EdgeInsets.all(10),
-                child: Icon(LucideIcons.list, color: Colors.black, size: 22),
+                child: Icon(LucideIcons.list, size: 22),
               ),
             ),
           ),
@@ -189,52 +189,44 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
   }
 
   Widget _buildBottomBar(ReaderState state, String ext) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.95),
-        border: Border(top: BorderSide(color: Colors.grey.shade200)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: .center,
-            spacing: 20,
-            children: [
-              Material(
-                elevation: 1,
-                color: Colors.white,
-                borderRadius: .circular(100),
-                child: InkWell(
-                  borderRadius: .circular(100),
-                  onTap: (){
+          Material(
+            elevation: 6,
+            shadowColor: Colors.black.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.tertiaryContainer,
+            borderRadius: BorderRadius.circular(100),
+            clipBehavior: Clip.antiAlias,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Previous button
+                InkWell(
+                  onTap: () {
                     if (state.currentPage > 1) {
                       ref.read(readerProvider.notifier).setPage(state.currentPage - 1);
                     }
                   },
-                  child: Container(
-                    padding: const .all(8),
-                    child: const Icon(LucideIcons.chevronLeft, color: Colors.black,),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Icon(LucideIcons.chevronLeft, size: 22),
                   ),
                 ),
-              ),
-              
-              GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => const PageSliderSheet(),
-                  );
-                },
-                child: Material(
-                  color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(100),
-                    elevation: 1,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+
+                // Page tracker
+                InkWell(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) => const PageSliderSheet(),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Text(
                       ext == '.epub' 
                         ? "Ch. ${state.currentPage} / ${state.totalPages}"
@@ -242,31 +234,26 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                       style: GoogleFonts.robotoMono(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              Material(
-                elevation: 1,
-                color: Colors.white,
-                borderRadius: .circular(100),
-                child: InkWell(
-                  borderRadius: .circular(100),
-                  onTap: (){
+                // Next button
+                InkWell(
+                  onTap: () {
                     if (state.currentPage < state.totalPages) {
-                    ref.read(readerProvider.notifier).setPage(state.currentPage + 1);
-                  }
+                      ref.read(readerProvider.notifier).setPage(state.currentPage + 1);
+                    }
                   },
-                  child: Container(
-                    padding: const .all(8),
-                    child: const Icon(LucideIcons.chevronRight, color: Colors.black,),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Icon(LucideIcons.chevronRight, size: 22),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

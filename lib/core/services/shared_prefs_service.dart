@@ -33,6 +33,12 @@ class SharedPrefsService {
 
   Future<void> setVerticalReadingMode(bool value) =>
       _prefs.setBool('vertical_reading_mode', value);
+
+  // ── Theme ───────────────────────────────────────────────────────
+
+  bool get isDarkMode => _prefs.getBool('is_dark_mode') ?? false;
+
+  Future<void> setDarkMode(bool value) => _prefs.setBool('is_dark_mode', value);
 }
 
 final sharedPrefsServiceProvider = Provider<SharedPrefsService>(

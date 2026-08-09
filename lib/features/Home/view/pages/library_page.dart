@@ -16,17 +16,15 @@ class LibraryPage extends ConsumerWidget {
       ..sort((a, b) => b.dateAdded.compareTo(a.dateAdded));
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: Colors.black),
+          icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Library",
           style: TextStyle(
-            color: Colors.black,
             fontSize: 20,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.5,

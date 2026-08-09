@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Home/model/book_model.dart';
@@ -62,12 +61,11 @@ class _RenameBookSheetState extends ConsumerState<RenameBookSheet> {
             ),
           ),
           const SizedBox(height: 32),
-          const Text(
+             const Text(
             "Book Name",
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 10),
@@ -77,10 +75,10 @@ class _RenameBookSheetState extends ConsumerState<RenameBookSheet> {
             autofocus: true,
             decoration: InputDecoration(
               hintText: "Enter new Book name",
-              hintStyle: const TextStyle(color: Colors.black45),
+              hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               errorText: !_isNameValid ? "Name cannot be blank" : null,
               filled: true,
-              fillColor: CupertinoColors.systemGrey6,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -97,11 +95,9 @@ class _RenameBookSheetState extends ConsumerState<RenameBookSheet> {
             height: 54,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                backgroundColor: Theme.of(context).colorScheme.onSurface,
+                foregroundColor: Theme.of(context).colorScheme.surface,
+
               ),
               onPressed: _isNameValid
                   ? () {

@@ -17,11 +17,11 @@ const _uuid = Uuid();
 class BookListNotifier extends Notifier<List<Book>> {
   @override
   List<Book> build() {
-    _loadBooks();
+    refresh();
     return [];
   }
 
-  Future<void> _loadBooks() async {
+  Future<void> refresh() async {
     final books = await LibraryService.instance.loadBooks();
     state = books;
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Profile/view/widgets/edit_profile_sheet.dart';
@@ -6,14 +7,13 @@ import 'package:image_app/features/auth/viewmodel/auth_providers.dart';
 import 'package:image_app/features/Profile/view/pages/settings_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-
-
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final theme = Theme.of(context).colorScheme;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -63,7 +63,7 @@ class ProfilePage extends ConsumerWidget {
                           user.email!,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey.shade600,
+                            color: theme.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -75,19 +75,19 @@ class ProfilePage extends ConsumerWidget {
               const SizedBox(height: 40),
 
               Material(
-                clipBehavior: .antiAlias,
-                color: const Color(0xFFF3F3F3),
+                clipBehavior: Clip.antiAlias,
+                color: theme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
                 child: Column(
                   children: [
                     profileOption(
+                      context: context,
                       icon: LucideIcons.userPen,
                       title: "Edit Profile",
                       onTap: () {
                         showModalBottomSheet<String>(
                           context: context,
                           isScrollControlled: true,
-                          backgroundColor: Colors.white,
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.vertical(
                               top: Radius.circular(24),
@@ -101,8 +101,9 @@ class ProfilePage extends ConsumerWidget {
                         );
                       },
                     ),
-                    const Divider(height: 1, color: Colors.white, thickness: 2),
+                    Divider(height: 1, color: theme.surface, thickness: 2),
                     profileOption(
+                      context: context,
                       icon: LucideIcons.settings,
                       title: "Settings",
                       onTap: () {
@@ -121,12 +122,13 @@ class ProfilePage extends ConsumerWidget {
               const SizedBox(height: 10),
 
               Material(
-                clipBehavior: .antiAlias,
-                color: const Color(0xFFF3F3F3),
+                clipBehavior: Clip.antiAlias,
+                color: theme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
                 child: Column(
                   children: [
                     profileOption(
+                      context: context,
                       isDestructive: true,
                       icon: LucideIcons.logOut,
                       title: "Log Out",
@@ -136,7 +138,6 @@ class ProfilePage extends ConsumerWidget {
                           builder: (context) {
                             return AlertDialog(
                               elevation: 1,
-                              backgroundColor: Colors.white,
                               title: const Text(
                                 "Log out",
                                 style: TextStyle(
@@ -147,10 +148,7 @@ class ProfilePage extends ConsumerWidget {
                               ),
                               content: const Text(
                                 "Are you sure you want to log out of your account?",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.black87,
-                                ),
+                                style: TextStyle(fontSize: 15),
                               ),
                               actionsPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -162,7 +160,7 @@ class ProfilePage extends ConsumerWidget {
                                     Navigator.pop(context);
                                   },
                                   style: TextButton.styleFrom(
-                                    foregroundColor: Colors.black54,
+                                    foregroundColor: theme.onSurface,
                                     textStyle: const TextStyle(
                                       fontFamily: "manrope",
                                       fontSize: 14,
@@ -179,7 +177,7 @@ class ProfilePage extends ConsumerWidget {
                                         .signOut();
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red.shade600,
+                                    backgroundColor: Colors.red.shade800,
                                     foregroundColor: Colors.white,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(

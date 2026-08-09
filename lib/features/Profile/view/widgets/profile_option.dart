@@ -4,10 +4,11 @@ Widget profileOption({
   required IconData icon,
   required String title,
   required VoidCallback onTap,
+  required BuildContext context,
   Widget? trailing,
   bool isDestructive = false,
 }) {
-  const destructiveColor = Color(0xFFDC2626);
+  final theme = Theme.of(context).colorScheme;
 
   return ListTile(
     onTap: onTap,
@@ -16,13 +17,13 @@ Widget profileOption({
     leading: Icon(
       icon,
       size: 22,
-      color: isDestructive ? destructiveColor : Colors.black,
+      color: isDestructive ? theme.error : theme.onSurface,
     ),
     title: Text(
       title,
       style: TextStyle(
         fontSize: 16,
-        color: isDestructive ? destructiveColor : Colors.black,
+        color: isDestructive ? theme.error : theme.onSurface,
         fontWeight: .w600,
         letterSpacing: 0,
       ),

@@ -15,7 +15,6 @@ class ChapterListSheet extends ConsumerWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -26,7 +25,7 @@ class ChapterListSheet extends ConsumerWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.shade300,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -37,32 +36,32 @@ class ChapterListSheet extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
               children: [
-                Text(
-                  "Chapters",
-                  style: GoogleFonts.robotoMono(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Text(
-                    "${chapters.length}",
+                  Text(
+                    "Chapters",
                     style: GoogleFonts.robotoMono(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                ),
+                  const SizedBox(width: 10),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Text(
+                      "${chapters.length}",
+                      style: GoogleFonts.robotoMono(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -70,7 +69,7 @@ class ChapterListSheet extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // Divider
-          Divider(color: Colors.grey.shade100, height: 1, thickness: 1),
+          Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest, height: 1, thickness: 1),
 
           // Chapter list
           Expanded(
@@ -80,12 +79,12 @@ class ChapterListSheet extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(LucideIcons.bookOpen,
-                            size: 40, color: Colors.grey.shade300),
+                            size: 40, color: Theme.of(context).colorScheme.surfaceContainerHighest),
                         const SizedBox(height: 12),
                         Text(
                           "No chapters found",
                           style: GoogleFonts.robotoMono(
-                            color: Colors.black38,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontSize: 14,
                           ),
                         ),
@@ -96,7 +95,7 @@ class ChapterListSheet extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: chapters.length,
                     separatorBuilder: (_, _) => Divider(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       height: 1,
                       indent: 24,
                       endIndent: 24,
@@ -108,7 +107,7 @@ class ChapterListSheet extends ConsumerWidget {
 
                       return Material(
                         color: isCurrent
-                            ? Colors.grey.shade50
+                            ? Theme.of(context).colorScheme.surfaceContainerHighest
                             : Colors.transparent,
                         child: InkWell(
                           onTap: () {
@@ -131,8 +130,8 @@ class ChapterListSheet extends ConsumerWidget {
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
                                       color: isCurrent
-                                          ? Colors.black
-                                          : Colors.black12,
+                                          ? Theme.of(context).colorScheme.onSurface
+                                          : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                                     ),
                                   ),
                                 ),
@@ -152,8 +151,8 @@ class ChapterListSheet extends ConsumerWidget {
                                               ? FontWeight.w700
                                               : FontWeight.w500,
                                           color: isCurrent
-                                              ? Colors.black
-                                              : Colors.black87,
+                                              ? Theme.of(context).colorScheme.onSurface
+                                              : Theme.of(context).colorScheme.onSurfaceVariant,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -164,7 +163,7 @@ class ChapterListSheet extends ConsumerWidget {
                                         style: GoogleFonts.robotoMono(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w400,
-                                          color: Colors.black38,
+                                          color: Theme.of(context).colorScheme.inverseSurface.withValues(alpha: 0.7),
                                         ),
                                       ),
                                     ],
@@ -177,7 +176,7 @@ class ChapterListSheet extends ConsumerWidget {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.black,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       borderRadius: BorderRadius.circular(100),
                                     ),
                                     child: Text(
@@ -185,7 +184,7 @@ class ChapterListSheet extends ConsumerWidget {
                                       style: GoogleFonts.robotoMono(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.white,
+                                        color: Theme.of(context).colorScheme.surface,
                                       ),
                                     ),
                                   ),

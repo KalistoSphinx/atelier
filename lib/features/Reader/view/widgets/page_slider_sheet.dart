@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_app/features/Reader/viewmodel/reader_provider.dart';
@@ -25,17 +26,16 @@ class _PageSliderSheetState extends ConsumerState<PageSliderSheet> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
+          const Text(
             "Jump to Page",
-            style: GoogleFonts.robotoMono(
+            style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 24),
@@ -50,8 +50,6 @@ class _PageSliderSheetState extends ConsumerState<PageSliderSheet> {
                   value: displayValue.clamp(1.0, safeMax),
                   min: 1,
                   max: safeMax,
-                  activeColor: Colors.black,
-                  inactiveColor: Colors.grey.shade300,
                   // Only update the local visual value during drag — no page jumps
                   onChanged: (val) {
                     setState(() {
@@ -78,7 +76,6 @@ class _PageSliderSheetState extends ConsumerState<PageSliderSheet> {
             "Page ${displayValue.round()} of ${state.totalPages}",
             style: GoogleFonts.robotoMono(
               fontSize: 14,
-              color: Colors.black54,
             ),
           ),
           const SizedBox(height: 24),

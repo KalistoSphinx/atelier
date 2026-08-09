@@ -1,11 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_app/features/Home/model/book_model.dart';
 import 'package:image_app/features/Home/viewmodel/book_list_provider.dart';
-import 'package:image_app/features/Home/view/widgets/rename_image_sheet.dart';
+import 'package:image_app/features/Home/view/widgets/rename_book_sheet.dart';
 import 'package:image_app/features/Reader/view/pages/reader_page.dart';
 
 class BookCard extends ConsumerStatefulWidget {
@@ -33,6 +34,8 @@ class _BookCardState extends ConsumerState<BookCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -91,8 +94,10 @@ class _BookCardState extends ConsumerState<BookCard> {
                     },
                     onLongPress: () async {
                       final selected = await showMenu<String>(
+                        
+                        clipBehavior: .antiAlias,
+                        menuPadding: .zero,
                         context: context,
-                        color: Colors.white,
                         elevation: 1,
                         constraints: const BoxConstraints(minWidth: 130),
                         position: RelativeRect.fromLTRB(
@@ -134,9 +139,9 @@ class _BookCardState extends ConsumerState<BookCard> {
                       if (selected == 'rename') {
                         if (context.mounted) {
                           showModalBottomSheet(
+                            barrierColor: Colors.black.withValues(alpha: 0.7),
                             context: context,
                             isScrollControlled: true,
-                            backgroundColor: Colors.white,
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.vertical(
                                 top: Radius.circular(24),
@@ -150,7 +155,7 @@ class _BookCardState extends ConsumerState<BookCard> {
                             },
                           );
                         }
-                      } else if (selected == 'delete') {
+                      } else if (selected== 'delete') {
                         if (context.mounted) {
                           _showDeleteDialog(context, ref);
                         }
@@ -172,11 +177,10 @@ class _BookCardState extends ConsumerState<BookCard> {
               // Fixed-height title block — same height whether 1 or 2 lines render
               Text(
                 widget.bookName,
-                style: GoogleFonts.robotoMono(
+                style: const TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
-                  letterSpacing: -0.1,
+                  fontWeight: .w700,
+                  letterSpacing: 0,
                   height: 1.4,
                 ),
                 maxLines: widget.showAuthor ? 1 : 2,
@@ -187,9 +191,11 @@ class _BookCardState extends ConsumerState<BookCard> {
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(
                     widget.book.author?.isNotEmpty == true ? widget.book.author! : 'Unknown Author',
-                    style: GoogleFonts.robotoMono(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Colors.black54,
+                      color: theme.onSurfaceVariant,
+                      fontWeight: .w600,
+                      letterSpacing: 0,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -212,7 +218,7 @@ class _BookCardState extends ConsumerState<BookCard> {
                                 : "Page ${widget.book.currentPage}",
                             style: GoogleFonts.robotoMono(
                               fontSize: 11,
-                              color: Colors.black54,
+                              color: theme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -220,7 +226,7 @@ class _BookCardState extends ConsumerState<BookCard> {
                             "${widget.book.totalPages > 1 ? ((widget.book.currentPage / widget.book.totalPages) * 100).toInt() : 0}%",
                             style: GoogleFonts.robotoMono(
                               fontSize: 11,
-                              color: Colors.black54,
+                              color: theme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -232,8 +238,8 @@ class _BookCardState extends ConsumerState<BookCard> {
                       value: widget.book.totalPages > 1
                           ? widget.book.currentPage / widget.book.totalPages
                           : 0.0,
-                      backgroundColor: Colors.grey.shade200,
-                      color: Colors.black,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(context).colorScheme.onSurface,
                       minHeight: 5,
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -251,8 +257,8 @@ class _BookCardState extends ConsumerState<BookCard> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          
           elevation: 1,
-          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -266,7 +272,7 @@ class _BookCardState extends ConsumerState<BookCard> {
           ),
           content: const Text(
             "Are you sure you want delete this book?",
-            style: TextStyle(fontSize: 15, color: Colors.black87),
+            style: TextStyle(fontSize: 15),
           ),
           actionsPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -276,7 +282,7 @@ class _BookCardState extends ConsumerState<BookCard> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.black54,
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
                 textStyle: const TextStyle(
                   fontFamily: "manrope",
                   fontSize: 14,

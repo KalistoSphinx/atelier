@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_app/core/theme.dart';
 import 'package:image_app/features/Home/view/pages/home_page.dart';
 import 'package:image_app/features/auth/view/auth_page.dart';
 import 'package:image_app/features/auth/viewmodel/auth_providers.dart';
@@ -104,16 +105,12 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateChangesProvider);
+    final isDarkMode = ref.watch(themeProvider);
 
     return MaterialApp(
-      themeMode: .dark,
-      darkTheme: ThemeData(
-        brightness: .dark,
-        fontFamily: "Manrope",
-      ),
-      theme: ThemeData(
-        fontFamily: "Manrope"
-      ),
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      darkTheme: darkMode,
+      theme: lightMode,
       debugShowCheckedModeBanner: false,
       home: authState.when(
         data: (user) => user == null ? const AuthPage() : const HomePage(),

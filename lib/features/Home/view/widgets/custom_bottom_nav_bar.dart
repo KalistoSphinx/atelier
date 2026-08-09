@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -13,12 +12,13 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Material(
           elevation: 1,
-          color: Colors.white.withValues(alpha: 0.8),
+          color: theme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(100),
           child: Container(
             padding: const EdgeInsets.all(6),
@@ -38,7 +38,7 @@ class CustomBottomNavBar extends StatelessWidget {
                       child: Container(
                         width: itemWidth,
                         decoration: BoxDecoration(
-                          color: CupertinoColors.systemGrey4,
+                          color: theme.secondaryContainer,
                           borderRadius: BorderRadius.circular(60),
                         ),
                       ),
@@ -49,14 +49,14 @@ class CustomBottomNavBar extends StatelessWidget {
                           child: GestureDetector(
                             onTap: () => onTap(0),
                             behavior: HitTestBehavior.opaque,
-                            child: const Column(
+                            child:  Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.home, color: Colors.black),
+                                Icon(Icons.home, color: theme.onSurface),
                                 Text(
                                   "Home",
                                   style: TextStyle(
-                                      color: Colors.black,
+                                      color: theme.onSurface,
                                       fontWeight: FontWeight.w500,
                                       letterSpacing: -0.1),
                                 ),
@@ -68,14 +68,14 @@ class CustomBottomNavBar extends StatelessWidget {
                           child: GestureDetector(
                             onTap: () => onTap(1),
                             behavior: HitTestBehavior.opaque,
-                            child: const Column(
+                            child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.person, color: Colors.black),
+                                Icon(Icons.person, color: theme.onSurface),
                                 Text(
                                   "Profile",
                                   style: TextStyle(
-                                      color: Colors.black,
+                                      color: theme.onSurface,
                                       fontWeight: FontWeight.w500,
                                       letterSpacing: -0.1),
                                 ),

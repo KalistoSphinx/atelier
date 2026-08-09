@@ -72,6 +72,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
   @override
   Widget build(BuildContext context) {
     final allBooks = ref.watch(bookListProvider);
+    final theme = Theme.of(context).colorScheme;
     final books = _searchQuery.isEmpty
         ? allBooks
         : allBooks.where((book) {
@@ -102,7 +103,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                       ref.read(bookListProvider.notifier).pickAndSaveImage(context);
                     },
                     padding: EdgeInsets.zero,
-                    child:  const Icon(Icons.add, size: 28, color: Colors.black,),
+                    child:   Icon(Icons.add, size: 28, color: theme.onSurface,),
                   ),
                 ],
               ),
@@ -121,19 +122,19 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                 },
                 decoration: InputDecoration(
                   hintText: 'Search...',
-                  hintStyle: const TextStyle(
-                    color: Colors.black45,
+                  hintStyle:  TextStyle(
+                    color: theme.onSurfaceVariant,
                     fontSize: 15,
                     letterSpacing: -0.2,
                     fontWeight: .w500,
                   ),
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.search,
-                    color: Colors.black54,
+                    color: theme.onSurfaceVariant,
                     size: 22,
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade200,
+                  fillColor: theme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: .none,
@@ -228,8 +229,9 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                                   );
                                 },
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.black,
-                                  side: BorderSide(color: Colors.grey.shade300),
+                                  foregroundColor: theme.onSurface,
+                                  backgroundColor: theme.surfaceContainerHighest,
+                                  side: .none,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
@@ -276,11 +278,11 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Continue Reading",
+          "Reading Now",
           style: TextStyle(
             fontSize: 20,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.6,
+            fontWeight: .bold,
+            letterSpacing: -0.2,
           ),
         ),
         const SizedBox(height: 16),
@@ -328,8 +330,8 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
           "Recently Added",
           style: TextStyle(
             fontSize: 20,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.6,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.2,
           ),
         ),
         const SizedBox(height: 16),
