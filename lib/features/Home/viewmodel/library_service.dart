@@ -1,6 +1,6 @@
+import 'dart:developer';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:image_app/features/Home/model/book_model.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -55,7 +55,7 @@ class LibraryService {
           .map((b) => Book.fromJson(b as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      debugPrint('Error loading library.json: $e');
+      log('Error loading library.json: $e');
       return [];
     }
   }

@@ -1,6 +1,6 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:epubx/epubx.dart';
-import 'package:flutter/foundation.dart';
 import 'package:image_app/features/Home/viewmodel/library_service.dart';
 import 'package:image/image.dart' as img;
 
@@ -22,7 +22,7 @@ class CoverExtractor {
         return await _extractFromPdf(documentFile, bookId);
       }
     } catch (e) {
-      debugPrint('Error extracting cover: $e');
+      log('Error extracting cover: $e');
     }
     return null;
   }
@@ -43,7 +43,7 @@ class CoverExtractor {
         return await _saveImageBytes(coverImageFile.content as List<int>, bookId);
       }
     } catch (e) {
-      debugPrint('Error extracting cbz cover: $e');
+      log('Error extracting cbz cover: $e');
     }
     return null;
   }
@@ -66,7 +66,7 @@ class CoverExtractor {
         return await _saveImageBytes(pageImage.bytes, bookId);
       }
     } catch (e) {
-      debugPrint('Error extracting pdf cover: $e');
+      log('Error extracting pdf cover: $e');
     }
     return null;
   }

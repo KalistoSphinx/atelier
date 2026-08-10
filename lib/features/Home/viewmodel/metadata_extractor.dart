@@ -1,8 +1,8 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:epubx/epubx.dart';
 import 'package:path/path.dart' as p;
 import 'package:syncfusion_flutter_pdf/pdf.dart' as sync_pdf;
-import 'package:flutter/foundation.dart';
 
 class MetadataExtractor {
   static Future<({String? title, String? author})> extractMetadata(File documentFile) async {
@@ -14,7 +14,7 @@ class MetadataExtractor {
         return await _extractPdfMetadata(documentFile);
       }
     } catch (e) {
-      debugPrint('Error extracting metadata: $e');
+      log('Error extracting metadata: $e');
     }
     return (title: null, author: null);
   }
@@ -25,7 +25,7 @@ class MetadataExtractor {
       final epubBook = await EpubReader.readBook(bytes);
       return (title: epubBook.Title, author: epubBook.Author);
     } catch (e) {
-      debugPrint('Error extracting epub metadata: $e');
+      log('Error extracting epub metadata: $e');
       return (title: null, author: null);
     }
   }
@@ -43,7 +43,7 @@ class MetadataExtractor {
         author: author.trim().isNotEmpty ? author : null,
       );
     } catch (e) {
-      debugPrint('Error extracting pdf metadata: $e');
+      log('Error extracting pdf metadata: $e');
     }
     return (title: null, author: null);
   }

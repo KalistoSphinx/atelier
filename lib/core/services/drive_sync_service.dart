@@ -1,6 +1,6 @@
+import 'dart:developer';
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
@@ -60,7 +60,7 @@ class DriveSyncService {
         authorization = await GoogleSignIn.instance.authorizationClient
             .authorizationForScopes(_scopes);
       } catch (e) {
-        debugPrint('DriveSyncService: Instance-level auth failed: $e');
+        log('DriveSyncService: Instance-level auth failed: $e');
       }
 
       // Tier 2: If instance-level auth didn't work, try restoring the
@@ -73,13 +73,13 @@ class DriveSyncService {
             authorization = await account.authorizationClient
                 .authorizationForScopes(_scopes);
           } catch (e) {
-            debugPrint('DriveSyncService: Account-level auth failed: $e');
+            log('DriveSyncService: Account-level auth failed: $e');
           }
         }
       }
 
       if (authorization == null) {
-        debugPrint('DriveSyncService: Could not obtain Drive authorization.');
+        log('DriveSyncService: Could not obtain Drive authorization.');
         return null;
       }
 
@@ -87,7 +87,7 @@ class DriveSyncService {
       _cachedDriveApi = drive.DriveApi(client);
       return _cachedDriveApi;
     } catch (e) {
-      debugPrint('DriveSyncService: Failed to get DriveApi: $e');
+      log('DriveSyncService: Failed to get DriveApi: $e');
       return null;
     }
   }
@@ -147,7 +147,7 @@ class DriveSyncService {
       final folder = await api.files.create(folderMeta);
       return folder.id;
     } catch (e) {
-      debugPrint('DriveSyncService: Failed to find/create folder "$name": $e');
+      log('DriveSyncService: Failed to find/create folder "$name": $e');
       return null;
     }
   }
@@ -204,7 +204,7 @@ class DriveSyncService {
         }
       }
     } catch (e) {
-      debugPrint('DriveSyncService: Failed to upsert "$relativePath": $e');
+      log('DriveSyncService: Failed to upsert "$relativePath": $e');
     }
   }
 
@@ -222,7 +222,7 @@ class DriveSyncService {
       manifest.files.remove(relativePath);
       await manifest.save();
     } catch (e) {
-      debugPrint('DriveSyncService: Failed to delete "$relativePath": $e');
+      log('DriveSyncService: Failed to delete "$relativePath": $e');
     }
   }
 
@@ -364,16 +364,16 @@ class DriveSyncService {
     } on drive.DetailedApiRequestError catch (e) {
       // Token expired mid-sync — retry once with a fresh token
       if ((e.status == 401 || e.status == 403) && !isRetry) {
-        debugPrint('DriveSyncService: Token expired during backup, retrying...');
+        log('DriveSyncService: Token expired during backup, retrying...');
         _invalidateAuth();
         _isSyncing = false;
         return backupNow(onProgress: onProgress, silent: silent, isRetry: true);
       }
-      debugPrint('DriveSyncService: backup failed: $e');
+      log('DriveSyncService: backup failed: $e');
       if (!silent) _ref.read(syncProgressProvider.notifier).error("Backup failed");
       return false;
     } catch (e) {
-      debugPrint('DriveSyncService: backup failed: $e');
+      log('DriveSyncService: backup failed: $e');
       if (!silent) _ref.read(syncProgressProvider.notifier).error("Backup failed");
       return false;
     } finally {
@@ -503,7 +503,7 @@ class DriveSyncService {
           }
           await sink.close();
         } catch (e) {
-          debugPrint(
+          log(
             'DriveSyncService: Failed to download ${dl.manifestKey}: $e',
           );
         }
@@ -532,7 +532,7 @@ class DriveSyncService {
           // Replace local library.json with Drive version
           await tempFile.rename(lib.libraryFile.path);
         } catch (e) {
-          debugPrint('DriveSyncService: Failed to download library.json: $e');
+          log('DriveSyncService: Failed to download library.json: $e');
         }
         done++;
         onProgress?.call(done, total);
@@ -547,21 +547,21 @@ class DriveSyncService {
         _ref.read(bookListProvider.notifier).refresh(); // Update UI state
       }
 
-      _ref.read(syncProgressProvider.notifier).complete("Load complete ✓");
+      _ref.read(syncProgressProvider.notifier).complete("Load complete");
       return true;
     } on drive.DetailedApiRequestError catch (e) {
       // Token expired mid-load — retry once with a fresh token
       if ((e.status == 401 || e.status == 403) && !isRetry) {
-        debugPrint('DriveSyncService: Token expired during load, retrying...');
+        log('DriveSyncService: Token expired during load, retrying...');
         _invalidateAuth();
         _isSyncing = false;
         return loadFromDrive(onProgress: onProgress, isRetry: true);
       }
-      debugPrint('DriveSyncService: loadFromDrive failed: $e');
+      log('DriveSyncService: loadFromDrive failed: $e');
       _ref.read(syncProgressProvider.notifier).error("Load failed");
       return false;
     } catch (e) {
-      debugPrint('DriveSyncService: loadFromDrive failed: $e');
+      log('DriveSyncService: loadFromDrive failed: $e');
       _ref.read(syncProgressProvider.notifier).error("Load failed");
       return false;
     } finally {

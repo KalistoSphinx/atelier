@@ -201,6 +201,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                             return FadeInDrop(
                               delayInMilliseconds: index * 100,
                               child: BookCard(
+                                key: ValueKey(book.id),
                                 book: book,
                                 bookName: book.title,
                                 showAuthor: true,
@@ -299,6 +300,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                 child: SizedBox(
                   width: 130, // Scale down the card horizontally
                   child: BookCard(
+                    key: ValueKey(book.id),
                     book: book,
                     bookName: book.title,
                     showAuthor: true,
@@ -348,6 +350,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                 child: SizedBox(
                   width: 130, // Scale down the card horizontally
                   child: BookCard(
+                    key: ValueKey(book.id),
                     book: book,
                     bookName: book.title,
                     showAuthor: true,

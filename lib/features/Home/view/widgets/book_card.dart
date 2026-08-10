@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,11 +80,12 @@ class _BookCardState extends ConsumerState<BookCard> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () {
-                      ref.read(bookListProvider.notifier).updateLastOpened(widget.book.id);
+                      final currentBook = widget.book;
+                      ref.read(bookListProvider.notifier).updateLastOpened(currentBook.id);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReaderPage(book: widget.book),
+                          builder: (context) => ReaderPage(book: currentBook),
                         ),
                       );
                     },

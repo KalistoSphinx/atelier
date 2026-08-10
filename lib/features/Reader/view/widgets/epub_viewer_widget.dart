@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 
 
 import 'package:epubx/epubx.dart' hide Image;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -26,6 +26,10 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
   final List<EpubChapter> _flatChapters = [];
   late PageController _pageController;
 
+  /// Pre-built image cache: filename → Uint8List bytes.
+  /// Built once on load, shared across all chapter pages.
+  final Map<String, Uint8List> _imageCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +47,17 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
 
       // Parse epub book in a separate isolate to keep UI smooth
       _epubBook = await compute(EpubReader.readBook, bytes);
+
+      // Pre-build image cache once so chapter pages never search or copy bytes
+      final images = _epubBook!.Content?.Images;
+      if (images != null) {
+        for (final entry in images.entries) {
+          if (entry.value.Content != null) {
+            final fileName = entry.key.split('/').last;
+            _imageCache[fileName] = Uint8List.fromList(entry.value.Content!);
+          }
+        }
+      }
 
       _extractChapters(_epubBook!.Chapters ?? []);
 
@@ -130,28 +145,70 @@ class _EpubViewerWidgetState extends ConsumerState<EpubViewerWidget> {
         return _ChapterPage(
           key: ValueKey('epub_ch_$index'),
           chapter: _flatChapters[index],
-          epubBook: _epubBook!,
+          imageCache: _imageCache,
         );
       },
     );
   }
 }
 
-/// Extracted as a separate widget so each chapter page maintains its own
-/// scroll state independently and Flutter can cache/dispose them efficiently.
-class _ChapterPage extends StatelessWidget {
+/// Extracted as a separate stateful widget with AutomaticKeepAliveClientMixin
+/// so each chapter page is kept alive when swiped away, avoiding expensive
+/// re-parsing of HTML content on every swipe.
+class _ChapterPage extends StatefulWidget {
   final EpubChapter chapter;
-  final EpubBook epubBook;
+  final Map<String, Uint8List> imageCache;
 
   const _ChapterPage({
     super.key,
     required this.chapter,
-    required this.epubBook,
+    required this.imageCache,
   });
 
   @override
+  State<_ChapterPage> createState() => _ChapterPageState();
+}
+
+class _ChapterPageState extends State<_ChapterPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  /// Whether the heavy Html widget has been built yet.
+  bool _contentReady = false;
+
+  /// Cache the built widget tree so subsequent build() calls are free.
+  Widget? _cachedContent;
+
+  @override
+  void initState() {
+    super.initState();
+    // Defer the heavy HTML rendering until after the current frame.
+    // This ensures the PageView swipe animation runs with a lightweight
+    // placeholder instead of blocking on Html parsing + layout.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _contentReady = true);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final htmlContent = chapter.HtmlContent ?? '';
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
+
+    if (!_contentReady) {
+      // Lightweight placeholder shown during the swipe animation frame.
+      return const SizedBox.shrink();
+    }
+
+    // Build the heavy Html widget once and cache it.
+    _cachedContent ??= _buildHtmlContent();
+    return RepaintBoundary(child: _cachedContent!);
+  }
+
+  Widget _buildHtmlContent() {
+    final htmlContent = widget.chapter.HtmlContent ?? '';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 60),
@@ -163,20 +220,14 @@ class _ChapterPage extends StatelessWidget {
             builder: (extensionContext) {
               final src = extensionContext.attributes['src'];
               if (src != null) {
-                // Find image in the parsed epub content directly instead of caching them all
                 final fileName = src.split('/').last;
-                final images = epubBook.Content?.Images;
-                
-                if (images != null) {
-                  // The map keys are full paths, so we need to match by filename
-                  final match = images.entries.where((e) => e.key.endsWith(fileName)).firstOrNull;
-                  if (match != null && match.value.Content != null) {
-                    return Image.memory(
-                      Uint8List.fromList(match.value.Content!),
-                      fit: BoxFit.contain,
-                      gaplessPlayback: true,
-                    );
-                  }
+                final cachedBytes = widget.imageCache[fileName];
+                if (cachedBytes != null) {
+                  return Image.memory(
+                    cachedBytes,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                  );
                 }
               }
               return const Icon(Icons.broken_image);

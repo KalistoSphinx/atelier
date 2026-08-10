@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +37,7 @@ void callbackDispatcher() {
       await syncService.backupNow(silent: true);
       return Future.value(true);
     } catch (err) {
-      debugPrint('Workmanager sync error: $err');
+      log('Workmanager sync error: $err');
       return Future.value(false);
     }
   });

@@ -1,6 +1,6 @@
+import 'dart:developer';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -45,7 +45,7 @@ class SyncManifest {
             {},
       );
     } catch (e) {
-      debugPrint('SyncManifest: Error loading: $e');
+      log('SyncManifest: Error loading: $e');
       return SyncManifest();
     }
   }
