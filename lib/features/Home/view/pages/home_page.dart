@@ -141,7 +141,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 16,
+                    vertical: 14,
                   ),
                 ),
               ),
